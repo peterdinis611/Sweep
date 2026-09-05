@@ -5,48 +5,78 @@ import { useI18n } from "@/i18n/provider"
 import { common } from "@/styles/common.stylex"
 import { colors, fonts } from "@/styles/tokens.stylex"
 
+const rise = stylex.keyframes({
+  from: { opacity: 0, transform: "translateY(14px)" },
+  to: { opacity: 1, transform: "translateY(0)" },
+})
+
 const styles = stylex.create({
   root: {
     position: "relative",
+    paddingBottom: "0.5rem",
+  },
+  kicker: {
+    animationName: rise,
+    animationDuration: "0.7s",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
   },
   title: {
-    marginTop: "1.25rem",
-    maxWidth: "14ch",
+    marginTop: "1rem",
+    maxWidth: "11ch",
     fontFamily: fonts.display,
-    fontSize: "3.15rem",
+    fontSize: "clamp(2.75rem, 7vw, 4.75rem)",
     fontWeight: 500,
-    lineHeight: 0.92,
-    letterSpacing: "-0.02em",
-    "@media (min-width: 640px)": {
-      fontSize: "4.4rem",
-    },
+    lineHeight: 0.9,
+    letterSpacing: "-0.035em",
+    animationName: rise,
+    animationDuration: "0.75s",
+    animationDelay: "80ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
   },
   em: {
     color: colors.accent,
     fontStyle: "italic",
+    fontWeight: 400,
   },
   lead: {
-    marginTop: "1.5rem",
-    maxWidth: "24rem",
+    marginTop: "1.75rem",
+    maxWidth: "22rem",
     fontSize: "1.05rem",
-    lineHeight: 1.625,
+    lineHeight: 1.65,
     color: colors.muted,
+    animationName: rise,
+    animationDuration: "0.75s",
+    animationDelay: "150ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
   },
-  delay80: { animationDelay: "80ms" },
-  delay150: { animationDelay: "150ms" },
+  rule: {
+    marginTop: "2.25rem",
+    width: "4.5rem",
+    height: 2,
+    backgroundColor: colors.accent,
+    animationName: rise,
+    animationDuration: "0.7s",
+    animationDelay: "210ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
+  },
 })
 
 export function HomeHero() {
   const { t } = useI18n()
   return (
     <div {...stylex.props(styles.root)}>
-      <span {...stylex.props(common.kicker, common.reveal)}>{t.home.kicker}</span>
-      <h1 {...stylex.props(styles.title, common.reveal, styles.delay80)}>
+      <p {...stylex.props(common.kicker, styles.kicker)}>{t.home.kicker}</p>
+      <h1 {...stylex.props(styles.title)}>
         {t.home.title}
         <br />
         <em {...stylex.props(styles.em)}>{t.home.titleEm}</em>
       </h1>
-      <p {...stylex.props(styles.lead, common.reveal, styles.delay150)}>{t.home.lead}</p>
+      <p {...stylex.props(styles.lead)}>{t.home.lead}</p>
+      <div {...stylex.props(styles.rule)} aria-hidden />
     </div>
   )
 }

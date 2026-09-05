@@ -27,6 +27,15 @@ export type Messages = {
     errorTitle: string
     failAnalyze: string
     failDemo: string
+    modeUrl: string
+    modeSitemap: string
+    sitemapHint: string
+    budgetKicker: string
+    minScore: string
+    maxLcp: string
+    crawlLimit: string
+    budgetToggle: string
+    budgetHide: string
   }
   progress: {
     labRunning: string
@@ -89,6 +98,12 @@ export type Messages = {
     metric: string
     score: string
     size: string
+    categoriesTitle: string
+    categoriesSub: string
+    budgetPass: string
+    budgetFail: string
+    annotationDone: string
+    annotationUndo: string
     impactHigh: string
     impactMedium: string
     impactLow: string
@@ -108,13 +123,13 @@ export const dictionaries: Record<Locale, Messages> = {
     header: { lab: "Laboratórium / Lighthouse", newScan: "Nové meranie" },
     footer: { tag: "Sweep / laboratórny odpočet" },
     home: {
-      kicker: "01 — meranie",
+      kicker: "Web performance lab",
       title: "Rýchlosť webu,",
       titleEm: "nameraná presne.",
       lead: "Core Web Vitals, waterfall a opravy s odhadovaným dopadom. Samostatný odpočet pre mobil a desktop.",
     },
     form: {
-      kicker: "02 — vstup",
+      kicker: "Začni meranie",
       urlLabel: "URL na analýzu",
       placeholder: "https://vasa-stranka.sk",
       demo: "Ukážka",
@@ -125,6 +140,15 @@ export const dictionaries: Record<Locale, Messages> = {
       errorTitle: "Chyba merania",
       failAnalyze: "Analýza zlyhala.",
       failDemo: "Ukážku sa nepodarilo načítať.",
+      modeUrl: "Jedna URL",
+      modeSitemap: "Sitemap",
+      sitemapHint: "Zadaj sitemap.xml alebo root webu — zmeriam až N stránok.",
+      budgetKicker: "Budget prahy",
+      minScore: "Min. skóre",
+      maxLcp: "Max. LCP (ms)",
+      crawlLimit: "Počet URL",
+      budgetToggle: "Nastaviť budget",
+      budgetHide: "Skryť budget",
     },
     progress: {
       labRunning: "Laboratórium beží",
@@ -213,7 +237,13 @@ export const dictionaries: Record<Locale, Messages> = {
       metric: "Metrika",
       score: "Skóre",
       size: "Veľkosť",
-      impactHigh: "vysoký",
+            categoriesTitle: "Lighthouse kategórie",
+      categoriesSub: "Performance, Accessibility, Best Practices a SEO.",
+      budgetPass: "Budget PASS",
+      budgetFail: "Budget FAIL",
+      annotationDone: "Označiť ako opravené",
+      annotationUndo: "Zrušiť označenie",
+impactHigh: "vysoký",
       impactMedium: "stredný",
       impactLow: "nízky",
     },
@@ -230,13 +260,13 @@ export const dictionaries: Record<Locale, Messages> = {
     header: { lab: "Laboratoř / Lighthouse", newScan: "Nové měření" },
     footer: { tag: "Sweep / laboratorní výsledek" },
     home: {
-      kicker: "01 — měření",
+      kicker: "Web performance lab",
       title: "Rychlost webu,",
       titleEm: "naměřená přesně.",
       lead: "Core Web Vitals, waterfall a opravy s odhadovaným dopadem. Samostatný výsledek pro mobil i desktop.",
     },
     form: {
-      kicker: "02 — vstup",
+      kicker: "Začni měření",
       urlLabel: "URL k analýze",
       placeholder: "https://vase-stranka.cz",
       demo: "Ukázka",
@@ -247,6 +277,15 @@ export const dictionaries: Record<Locale, Messages> = {
       errorTitle: "Chyba měření",
       failAnalyze: "Analýza selhala.",
       failDemo: "Ukázku se nepodařilo načíst.",
+      modeUrl: "Jedna URL",
+      modeSitemap: "Sitemap",
+      sitemapHint: "Zadej sitemap.xml nebo root webu — změřím až N stránek.",
+      budgetKicker: "Budget prahy",
+      minScore: "Min. skóre",
+      maxLcp: "Max. LCP (ms)",
+      crawlLimit: "Počet URL",
+      budgetToggle: "Nastavit budget",
+      budgetHide: "Skrýt budget",
     },
     progress: {
       labRunning: "Laboratoř běží",
@@ -335,7 +374,13 @@ export const dictionaries: Record<Locale, Messages> = {
       metric: "Metrika",
       score: "Skóre",
       size: "Velikost",
-      impactHigh: "vysoký",
+            categoriesTitle: "Lighthouse kategorie",
+      categoriesSub: "Performance, Accessibility, Best Practices a SEO.",
+      budgetPass: "Budget PASS",
+      budgetFail: "Budget FAIL",
+      annotationDone: "Označit jako opravené",
+      annotationUndo: "Zrušit označení",
+impactHigh: "vysoký",
       impactMedium: "střední",
       impactLow: "nízký",
     },
@@ -352,13 +397,13 @@ export const dictionaries: Record<Locale, Messages> = {
     header: { lab: "Laboratory / Lighthouse", newScan: "New scan" },
     footer: { tag: "Sweep / lab readout" },
     home: {
-      kicker: "01 — measure",
+      kicker: "Web performance lab",
       title: "Web speed,",
       titleEm: "measured precisely.",
       lead: "Core Web Vitals, waterfall, and fixes with estimated impact. Separate lab runs for mobile and desktop.",
     },
     form: {
-      kicker: "02 — input",
+      kicker: "Start a run",
       urlLabel: "URL to analyze",
       placeholder: "https://your-site.com",
       demo: "Demo",
@@ -369,6 +414,15 @@ export const dictionaries: Record<Locale, Messages> = {
       errorTitle: "Measurement error",
       failAnalyze: "Analysis failed.",
       failDemo: "Could not load the demo.",
+      modeUrl: "Single URL",
+      modeSitemap: "Sitemap",
+      sitemapHint: "Enter sitemap.xml or site root — I'll measure up to N pages.",
+      budgetKicker: "Budget thresholds",
+      minScore: "Min. score",
+      maxLcp: "Max LCP (ms)",
+      crawlLimit: "URL count",
+      budgetToggle: "Set budget",
+      budgetHide: "Hide budget",
     },
     progress: {
       labRunning: "Lab running",
@@ -457,7 +511,13 @@ export const dictionaries: Record<Locale, Messages> = {
       metric: "Metric",
       score: "Score",
       size: "Size",
-      impactHigh: "high",
+            categoriesTitle: "Lighthouse categories",
+      categoriesSub: "Performance, Accessibility, Best Practices, and SEO.",
+      budgetPass: "Budget PASS",
+      budgetFail: "Budget FAIL",
+      annotationDone: "Mark as fixed",
+      annotationUndo: "Undo mark",
+impactHigh: "high",
       impactMedium: "medium",
       impactLow: "low",
     },

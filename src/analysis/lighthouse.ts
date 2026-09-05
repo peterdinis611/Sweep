@@ -31,6 +31,8 @@ function resolveBrowser() {
   return CANDIDATES.find((p) => existsSync(p))
 }
 
+const CATEGORIES = ["performance", "accessibility", "best-practices", "seo"] as const
+
 const desktopSettings = {
   extends: "lighthouse:default",
   settings: {
@@ -50,7 +52,7 @@ const desktopSettings = {
       downloadThroughputKbps: 0,
       uploadThroughputKbps: 0,
     },
-    onlyCategories: ["performance"],
+    onlyCategories: [...CATEGORIES],
   },
 }
 
@@ -83,7 +85,7 @@ export async function runLocalPair(
       port: chrome.port,
       output: "json" as const,
       logLevel: "error" as const,
-      onlyCategories: ["performance"],
+      onlyCategories: [...CATEGORIES],
     }
 
     const mobileRes = await lighthouse(url, flags)

@@ -51,8 +51,33 @@ export type FilmstripFrame = {
   data: string
 }
 
+export type CategoryScores = {
+  performance: number
+  accessibility: number | null
+  bestPractices: number | null
+  seo: number | null
+}
+
+export type Budget = {
+  minScore: number
+  maxLcpMs: number
+}
+
+export type BudgetFailure = {
+  id: string
+  label: string
+  actual: string
+  limit: string
+}
+
+export type BudgetCheck = {
+  passed: boolean
+  failures: BudgetFailure[]
+}
+
 export type StrategyReport = {
   score: number
+  categories: CategoryScores
   lcp: Metric
   inp: Metric | null
   tbt: Metric
@@ -77,7 +102,31 @@ export type Report = {
   engine: AnalysisEngine
   /** Predchádzajúci report pre tú istú URL (A/B diff). */
   previousId?: string
+  budget: Budget
+  budgetResult: { mobile: BudgetCheck; desktop: BudgetCheck }
   mobile: StrategyReport
   desktop: StrategyReport
   field: FieldMetric[]
+}
+
+export type CrawlItem = {
+  url: string
+  reportId?: string
+  error?: string
+  mobileScore?: number
+  desktopScore?: number
+  budgetPassed?: boolean
+}
+
+export type Crawl = {
+  id: string
+  sitemapUrl: string
+  createdAt: string
+  budget: Budget
+  items: CrawlItem[]
+}
+
+export const DEFAULT_BUDGET: Budget = {
+  minScore: 50,
+  maxLcpMs: 2500,
 }

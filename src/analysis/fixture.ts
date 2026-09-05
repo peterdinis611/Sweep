@@ -1,4 +1,6 @@
 import type { Report, StrategyReport } from "@/analysis/types"
+import { DEFAULT_BUDGET } from "@/analysis/types"
+import { evaluateBudget } from "@/analysis/budget"
 
 function svgFrame(label: string, bg: string, accent = "#0a2458") {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="135" height="240" viewBox="0 0 135 240"><rect width="135" height="240" fill="${bg}"/><rect x="10" y="16" width="115" height="14" rx="2" fill="${accent}" opacity=".35"/><rect x="10" y="40" width="80" height="8" rx="2" fill="#000" opacity=".12"/><rect x="10" y="56" width="115" height="70" rx="3" fill="${accent}" opacity=".18"/><rect x="10" y="140" width="115" height="8" rx="2" fill="#000" opacity=".1"/><rect x="10" y="156" width="90" height="8" rx="2" fill="#000" opacity=".08"/><text x="67" y="220" text-anchor="middle" fill="#666" font-size="11" font-family="ui-monospace,monospace">${label}</text></svg>`
@@ -14,11 +16,27 @@ function filmstrip(timings: number[], bgs: string[]) {
 
 function strat(
   score: number,
+  categories: StrategyReport["categories"],
   extra: Partial<StrategyReport> &
-    Pick<StrategyReport, "lcp" | "tbt" | "cls" | "fcp" | "ttfb" | "speedIndex" | "bytes" | "requests" | "opportunities" | "strengths" | "waterfall" | "filmstrip">,
+    Pick<
+      StrategyReport,
+      | "lcp"
+      | "tbt"
+      | "cls"
+      | "fcp"
+      | "ttfb"
+      | "speedIndex"
+      | "bytes"
+      | "requests"
+      | "opportunities"
+      | "strengths"
+      | "waterfall"
+      | "filmstrip"
+    >,
 ): StrategyReport {
   return {
     score,
+    categories,
     inp: {
       id: "inp",
       label: "INP",
@@ -29,6 +47,19 @@ function strat(
     },
     screenshot: svgFrame("final", "#e8e4da", "#0a2458"),
     ...extra,
+  }
+}
+
+
+function withBudget(report: Omit<Report, "budgetResult"> & { budgetResult?: Report["budgetResult"] }): Report {
+  const budget = report.budget ?? DEFAULT_BUDGET
+  return {
+    ...report,
+    budget,
+    budgetResult: {
+      mobile: evaluateBudget(report.mobile, budget),
+      desktop: evaluateBudget(report.desktop, budget),
+    },
   }
 }
 
@@ -56,18 +87,19 @@ const POOR_WATERFALL = [
 ]
 
 /** Realistická stredná ukážka (~68 mobil). */
-export const DEMO_REPORT: Report = {
+export const DEMO_REPORT: Report = withBudget({
   id: "demo-mid",
   url: "https://shop.example/sk/",
   finalUrl: "https://shop.example/sk/",
   createdAt: new Date().toISOString(),
   engine: "demo",
+  budget: DEFAULT_BUDGET,
   field: [
     { id: "lcp", label: "LCP (pole)", display: "2.84 s", percentile: 2840, category: "ni" },
     { id: "inp", label: "INP (pole)", display: "148 ms", percentile: 148, category: "good" },
     { id: "cls", label: "CLS (pole)", display: "0.08", percentile: 0.08, category: "good" },
   ],
-  mobile: strat(68, {
+  mobile: strat(68, { performance: 68, accessibility: 92, bestPractices: 88, seo: 100 }, {
     lcp: { id: "lcp", label: "LCP", display: "3.12 s", numeric: 3120, rating: "ni", unit: "ms" },
     tbt: { id: "tbt", label: "TBT", display: "280 ms", numeric: 280, rating: "ni", unit: "ms" },
     cls: { id: "cls", label: "CLS", display: "0.06", numeric: 0.06, rating: "good", unit: "score" },
@@ -139,7 +171,7 @@ export const DEMO_REPORT: Report = {
       ["#f7f4ec", "#efeae0", "#e6e0d4", "#ddd6c8", "#d4ccbc"],
     ),
   }),
-  desktop: strat(84, {
+  desktop: strat(84, { performance: 84, accessibility: 95, bestPractices: 92, seo: 100 }, {
     lcp: { id: "lcp", label: "LCP", display: "1.68 s", numeric: 1680, rating: "good", unit: "ms" },
     tbt: { id: "tbt", label: "TBT", display: "90 ms", numeric: 90, rating: "good", unit: "ms" },
     cls: { id: "cls", label: "CLS", display: "0.04", numeric: 0.04, rating: "good", unit: "score" },
@@ -188,21 +220,22 @@ export const DEMO_REPORT: Report = {
       ["#f7f4ec", "#f0ebe1", "#e8e2d6", "#e0d9cb", "#d8d0c2"],
     ),
   }),
-}
+})
 
 /** Ukážka ťažkého webu — veľké obrázky, JS, CLS. */
-export const DEMO_REPORT_POOR: Report = {
+export const DEMO_REPORT_POOR: Report = withBudget({
   id: "demo-poor",
   url: "https://slow.example/",
   finalUrl: "https://slow.example/",
   createdAt: new Date().toISOString(),
   engine: "demo",
+  budget: DEFAULT_BUDGET,
   field: [
     { id: "lcp", label: "LCP (pole)", display: "5.40 s", percentile: 5400, category: "poor" },
     { id: "inp", label: "INP (pole)", display: "320 ms", percentile: 320, category: "ni" },
     { id: "cls", label: "CLS (pole)", display: "0.28", percentile: 0.28, category: "poor" },
   ],
-  mobile: strat(32, {
+  mobile: strat(32, { performance: 32, accessibility: 71, bestPractices: 58, seo: 82 }, {
     lcp: { id: "lcp", label: "LCP", display: "6.20 s", numeric: 6200, rating: "poor", unit: "ms" },
     tbt: { id: "tbt", label: "TBT", display: "980 ms", numeric: 980, rating: "poor", unit: "ms" },
     cls: { id: "cls", label: "CLS", display: "0.31", numeric: 0.31, rating: "poor", unit: "score" },
@@ -262,7 +295,7 @@ export const DEMO_REPORT_POOR: Report = {
       ["#f0ebe3", "#e4ddd2", "#d8d0c2", "#ccc3b2", "#c0b6a4"],
     ),
   }),
-  desktop: strat(51, {
+  desktop: strat(51, { performance: 51, accessibility: 74, bestPractices: 62, seo: 85 }, {
     lcp: { id: "lcp", label: "LCP", display: "3.40 s", numeric: 3400, rating: "ni", unit: "ms" },
     tbt: { id: "tbt", label: "TBT", display: "420 ms", numeric: 420, rating: "ni", unit: "ms" },
     cls: { id: "cls", label: "CLS", display: "0.22", numeric: 0.22, rating: "ni", unit: "score" },
@@ -305,4 +338,4 @@ export const DEMO_REPORT_POOR: Report = {
       ["#f0ebe3", "#e6dfd4", "#dcd4c6", "#d2c9b8", "#c8beaa"],
     ),
   }),
-}
+})

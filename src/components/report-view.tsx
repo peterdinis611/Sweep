@@ -1,13 +1,18 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Check, Download, Printer, Share2 } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Check, Download, FileDown, Share2 } from "lucide-react"
 import * as stylex from "@stylexjs/stylex"
 import type { Report, Strategy, StrategyReport } from "@/analysis/types"
+import { DEFAULT_BUDGET } from "@/analysis/types"
 import { formatBytes, formatMs } from "@/analysis/pagespeed"
 import { buildStrategyDelta, deltaTone, formatDelta } from "@/analysis/compare"
+import { buildReportPdf } from "@/analysis/pdf"
+import { evaluateBudget } from "@/analysis/budget"
 import { ScoreGauge, RatingDot } from "./score-gauge"
 import { Waterfall } from "./waterfall"
+import { useOpportunityAnnotations } from "./use-opportunity-annotations"
 import {
   Accordion,
   AccordionContent,
@@ -439,6 +444,55 @@ const styles = stylex.create({
     borderColor: colors.line,
     backgroundColor: colors.card,
   },
+  budgetPass: {
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.good,
+    backgroundColor: "color-mix(in oklab, var(--good) 12%, var(--card))",
+    paddingInline: "1.25rem",
+    paddingBlock: "1rem",
+  },
+  budgetFail: {
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.bad,
+    backgroundColor: "color-mix(in oklab, var(--bad) 10%, var(--card))",
+    paddingInline: "1.25rem",
+    paddingBlock: "1rem",
+  },
+  budgetTitle: {
+    fontFamily: fonts.mono,
+    fontSize: "0.68rem",
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+  },
+  budgetList: {
+    marginTop: "0.5rem",
+    marginBottom: 0,
+    paddingLeft: "1.1rem",
+    fontSize: "0.88rem",
+    lineHeight: 1.5,
+    color: colors.muted,
+  },
+  catGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 1,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.line,
+    backgroundColor: colors.line,
+    "@media (min-width: 640px)": {
+      gridTemplateColumns: "repeat(4, 1fr)",
+    },
+  },
+  fixedBtn: {
+    marginTop: "0.75rem",
+  },
+  fixedMark: {
+    opacity: 0.55,
+    textDecoration: "line-through",
+  },
 })
 
 function ratingStyle(rating: "good" | "ni" | "poor") {
@@ -449,9 +503,21 @@ function ratingStyle(rating: "good" | "ni" | "poor") {
 
 export function ReportView({ report, previous }: { report: Report; previous?: Report | null }) {
   const { t, locale } = useI18n()
-  const [strategy, setStrategy] = useState<Strategy>("mobile")
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialStrategy = searchParams.get("s") === "desktop" ? "desktop" : "mobile"
+  const [strategy, setStrategy] = useState<Strategy>(initialStrategy)
   const [copied, setCopied] = useState(false)
+  const annotations = useOpportunityAnnotations(report.id)
   const data = report[strategy]
+  const budget = report.budget ?? DEFAULT_BUDGET
+  const budgetCheck = report.budgetResult?.[strategy] ?? evaluateBudget(data, budget)
+  const categories = data.categories ?? {
+    performance: data.score,
+    accessibility: null,
+    bestPractices: null,
+    seo: null,
+  }
   const strengths = data.strengths ?? []
   const fixPlan = useMemo(
     () => [...data.opportunities].sort((a, b) => b.savingsMs - a.savingsMs).slice(0, 3),
@@ -462,14 +528,37 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
   )
 
   useEffect(() => {
+    setStrategy(searchParams.get("s") === "desktop" ? "desktop" : "mobile")
+  }, [searchParams])
+
+  useEffect(() => {
     setOpen(data.opportunities[0]?.id ? [data.opportunities[0].id] : [])
   }, [strategy, data.opportunities])
 
+  function changeStrategy(next: Strategy) {
+    setStrategy(next)
+    const params = new URLSearchParams(searchParams.toString())
+    if (next === "desktop") params.set("s", "desktop")
+    else params.delete("s")
+    const q = params.toString()
+    router.replace(q ? `?${q}` : "?", { scroll: false })
+  }
+
   async function share() {
-    const link = `${window.location.origin}/r/${report.id}`
+    const link = `${window.location.origin}/r/${report.id}${strategy === "desktop" ? "?s=desktop" : ""}`
     await navigator.clipboard.writeText(link)
     setCopied(true)
     setTimeout(() => setCopied(false), 1600)
+  }
+
+  function downloadPdf() {
+    const bytes = buildReportPdf(report, strategy)
+    const blob = new Blob([Uint8Array.from(bytes)], { type: "application/pdf" })
+    const a = document.createElement("a")
+    a.href = URL.createObjectURL(blob)
+    a.download = `sweep-${strategy}-${report.id.slice(0, 8)}.pdf`
+    a.click()
+    URL.revokeObjectURL(a.href)
   }
 
   const host = report.finalUrl.replace(/^https?:\/\//, "")
@@ -504,7 +593,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           </p>
         </div>
         <div data-testid="report-toolbar" {...stylex.props(styles.toolbar, common.noPrint)}>
-          <Tabs value={strategy} onValueChange={(value) => setStrategy(value as Strategy)}>
+          <Tabs value={strategy} onValueChange={(value) => changeStrategy(value as Strategy)}>
             <TabsList>
               <TabsTrigger value="mobile" data-testid="tab-mobile" style={styles.tabTrigger}>
                 {t.report.mobile}
@@ -526,11 +615,11 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           <Button
             type="button"
             variant="ghost"
-            data-testid="export-print"
+            data-testid="export-pdf"
             style={buttonStyles.roundedNone}
-            onClick={() => window.print()}
+            onClick={downloadPdf}
           >
-            <Printer size={14} /> PDF
+            <FileDown size={14} /> PDF
           </Button>
           <Button
             type="button"
@@ -545,6 +634,26 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </div>
       </div>
       <Separator />
+
+      <div
+        data-testid="budget-banner"
+        {...stylex.props(budgetCheck.passed ? styles.budgetPass : styles.budgetFail)}
+      >
+        <p {...stylex.props(styles.budgetTitle, budgetCheck.passed ? common.ratingGood : common.ratingPoor)}>
+          {budgetCheck.passed ? t.report.budgetPass : t.report.budgetFail}
+          {" · "}
+          {t.report.score} ≥ {budget.minScore} · LCP ≤ {formatMs(budget.maxLcpMs)}
+        </p>
+        {!budgetCheck.passed && (
+          <ul {...stylex.props(styles.budgetList)}>
+            {budgetCheck.failures.map((f) => (
+              <li key={f.id}>
+                {f.label}: {f.actual} ({f.limit})
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div data-testid="score-row" {...stylex.props(styles.scoreRow)}>
         <ScoreGauge
@@ -574,6 +683,16 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           </article>
         </div>
       </div>
+
+      <section data-testid="categories-section">
+        <SectionTitle index="03b" title={t.report.categoriesTitle} subtitle={t.report.categoriesSub} />
+        <div {...stylex.props(styles.catGrid)}>
+          <CatCell label="Performance" value={categories.performance} />
+          <CatCell label="Accessibility" value={categories.accessibility} />
+          <CatCell label="Best Practices" value={categories.bestPractices} />
+          <CatCell label="SEO" value={categories.seo} />
+        </div>
+      </section>
 
       <section data-testid="field-section">
         <SectionTitle index="04" title={t.report.fieldTitle} subtitle={t.report.fieldSub} />
@@ -651,25 +770,44 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
               <p {...stylex.props(styles.empty)}>{t.report.improveEmpty}</p>
             ) : (
               <Accordion value={open} onValueChange={setOpen}>
-                {data.opportunities.map((op) => (
-                  <AccordionItem key={op.id} value={op.id}>
-                    <AccordionTrigger style={styles.accordionTrigger}>
-                      <span {...stylex.props(styles.triggerInner)}>
-                        <ImpactBadge impact={op.impact} />
-                        <span {...stylex.props(styles.triggerBody)}>
-                          <span {...stylex.props(styles.triggerTitle)}>{op.title}</span>
-                          <span {...stylex.props(styles.triggerMeta)}>
-                            {op.displayValue ?? formatMs(op.savingsMs)}
-                            {op.id.startsWith("metric-") ? "" : ` · ~${op.scoreHint} b`}
+                {data.opportunities.map((op) => {
+                  const done = annotations.isFixed(op.id)
+                  return (
+                    <AccordionItem key={op.id} value={op.id}>
+                      <AccordionTrigger style={styles.accordionTrigger}>
+                        <span {...stylex.props(styles.triggerInner, done && styles.fixedMark)}>
+                          <ImpactBadge impact={op.impact} />
+                          <span {...stylex.props(styles.triggerBody)}>
+                            <span {...stylex.props(styles.triggerTitle)}>
+                              {done ? `✓ ${op.title}` : op.title}
+                            </span>
+                            <span {...stylex.props(styles.triggerMeta)}>
+                              {op.displayValue ?? formatMs(op.savingsMs)}
+                              {op.id.startsWith("metric-") ? "" : ` · ~${op.scoreHint} b`}
+                            </span>
                           </span>
                         </span>
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionPanel>
-                      <AccordionContent style={styles.accordionContent}>{op.description}</AccordionContent>
-                    </AccordionPanel>
-                  </AccordionItem>
-                ))}
+                      </AccordionTrigger>
+                      <AccordionPanel>
+                        <AccordionContent style={styles.accordionContent}>
+                          {op.description}
+                          <div {...stylex.props(styles.fixedBtn, common.noPrint)}>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant={done ? "secondary" : "outline"}
+                              data-testid={`annotate-${op.id}`}
+                              style={buttonStyles.roundedNone}
+                              onClick={() => annotations.toggle(op.id)}
+                            >
+                              {done ? t.report.annotationUndo : t.report.annotationDone}
+                            </Button>
+                          </div>
+                        </AccordionContent>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  )
+                })}
               </Accordion>
             )}
           </div>
@@ -749,6 +887,18 @@ function MetricCell({
       </p>
       <p {...stylex.props(styles.cellValue, ratingStyle(metric.rating))}>{metric.display}</p>
       <p {...stylex.props(styles.cellHint)}>{hint}</p>
+    </article>
+  )
+}
+
+function CatCell({ label, value }: { label: string; value: number | null }) {
+  const tone = value == null ? null : value >= 90 ? "good" : value >= 50 ? "ni" : "poor"
+  return (
+    <article {...stylex.props(styles.cell)}>
+      <p {...stylex.props(common.kicker)}>{label}</p>
+      <p {...stylex.props(styles.cellValue, tone ? ratingStyle(tone) : undefined)}>
+        {value == null ? "—" : value}
+      </p>
     </article>
   )
 }

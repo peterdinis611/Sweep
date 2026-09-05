@@ -1,4 +1,17 @@
-import type { FieldMetric, Impact, Metric, Rating, Report, Strategy, StrategyReport, WaterfallItem } from "@/analysis/types"
+import type {
+  CategoryScores,
+  FieldMetric,
+  Impact,
+  Metric,
+  Rating,
+  Report,
+  Strategy,
+  StrategyReport,
+  WaterfallItem,
+  Budget,
+} from "@/analysis/types"
+import { DEFAULT_BUDGET } from "@/analysis/types"
+import { evaluateBudget, normalizeBudget } from "@/analysis/budget"
 import { buildImprovements, buildStrengths, localizeOpportunityTitles } from "@/analysis/insights"
 
 const LABELS: Record<string, string> = {
@@ -58,7 +71,12 @@ export type PsiResponse = {
     requestedUrl?: string
     fetchTime?: string
     runtimeError?: { code?: string; message?: string }
-    categories?: { performance?: { score?: number | null } }
+    categories?: {
+      performance?: { score?: number | null }
+      accessibility?: { score?: number | null }
+      "best-practices"?: { score?: number | null }
+      seo?: { score?: number | null }
+    }
     audits?: Record<string, PsiAudit>
   }
 }
@@ -105,6 +123,7 @@ function parseStrategy(json: PsiResponse): StrategyReport {
 
   const audits = lhr.audits ?? {}
   const score = Math.round((lhr.categories?.performance?.score ?? 0) * 100)
+  const categories = parseCategories(lhr.categories)
 
   const lcpN = num(audits["largest-contentful-paint"])
   const fcpN = num(audits["first-contentful-paint"])
@@ -168,6 +187,7 @@ function parseStrategy(json: PsiResponse): StrategyReport {
 
   return {
     score,
+    categories,
     lcp,
     inp: inpField,
     tbt,
@@ -182,6 +202,22 @@ function parseStrategy(json: PsiResponse): StrategyReport {
     waterfall,
     screenshot: audits["final-screenshot"]?.details?.data,
     filmstrip,
+  }
+}
+
+function parseCategories(cats?: {
+  performance?: { score?: number | null }
+  accessibility?: { score?: number | null }
+  "best-practices"?: { score?: number | null }
+  seo?: { score?: number | null }
+} | null): CategoryScores {
+  const scoreOf = (v?: { score?: number | null } | null) =>
+    v?.score == null ? null : Math.round(v.score * 100)
+  return {
+    performance: scoreOf(cats?.performance) ?? 0,
+    accessibility: scoreOf(cats?.accessibility),
+    bestPractices: scoreOf(cats?.["best-practices"]),
+    seo: scoreOf(cats?.seo),
   }
 }
 
@@ -322,9 +358,11 @@ export async function runPagespeed(url: string, strategy: Strategy, signal?: Abo
   const params = new URLSearchParams({
     url,
     strategy,
-    category: "performance",
     locale: "sk",
   })
+  for (const cat of ["performance", "accessibility", "best-practices", "seo"]) {
+    params.append("category", cat)
+  }
   const key = process.env.PAGESPEED_API_KEY
   if (key) params.set("key", key)
 
@@ -344,12 +382,15 @@ export function buildReport(
   url: string,
   mobileJson: PsiResponse,
   desktopJson: PsiResponse,
-  meta: { engine: Report["engine"]; previousId?: string } = { engine: "lighthouse" },
+  meta: { engine: Report["engine"]; previousId?: string; budget?: Partial<Budget> } = {
+    engine: "lighthouse",
+  },
 ): Report {
   const mobile = parseStrategy(mobileJson)
   const desktop = parseStrategy(desktopJson)
   const field = parseField(mobileJson).length ? parseField(mobileJson) : parseField(desktopJson)
   const finalUrl = mobileJson.lighthouseResult?.finalUrl ?? desktopJson.lighthouseResult?.finalUrl ?? url
+  const budget = normalizeBudget(meta.budget ?? DEFAULT_BUDGET)
   return {
     id,
     url,
@@ -357,6 +398,11 @@ export function buildReport(
     createdAt: new Date().toISOString(),
     engine: meta.engine,
     previousId: meta.previousId,
+    budget,
+    budgetResult: {
+      mobile: evaluateBudget(mobile, budget),
+      desktop: evaluateBudget(desktop, budget),
+    },
     mobile,
     desktop,
     field,

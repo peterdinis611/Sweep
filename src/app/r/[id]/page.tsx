@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { loadReport } from "@/analysis/store"
@@ -25,6 +26,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     openGraph: {
       title: `${host} · Sweep`,
       description: `Mobil ${report.mobile.score} · Desktop ${report.desktop.score}`,
+      images: [`/r/${report.id}/opengraph-image`],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${host} · Sweep`,
+      description: `Mobil ${report.mobile.score} · Desktop ${report.desktop.score}`,
     },
   }
 }
@@ -38,7 +45,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   return (
     <MeasureWorkspace key={report.id} initialUrl={report.url}>
-      <ReportView report={report} previous={previous} />
+      <Suspense fallback={null}>
+        <ReportView report={report} previous={previous} />
+      </Suspense>
     </MeasureWorkspace>
   )
 }
