@@ -140,7 +140,7 @@ export function FaultScreen({
   const stroke = tone === "bad" ? "var(--bad)" : "var(--accent)"
   const codeProps = stylex.props(styles.code)
   return (
-    <section {...stylex.props(styles.section)}>
+    <section data-testid="fault-screen" data-code={code} {...stylex.props(styles.section)}>
       <p aria-hidden {...stylex.props(styles.watermark)}>
         {code}
       </p>

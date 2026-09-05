@@ -14,3 +14,13 @@ PageSpeed Insights API je len záloha, ak Chrome nie je k dispozícii a v `.env.
 Reporty sú v `data/reports/` a dajú sa zdieľať cez `/r/[id]`. Po opätovnom meraní rovnakej URL uvidíš A/B diff. Staré reporty sa mažú podľa `REPORT_TTL_DAYS` (default 14).
 
 Ukážky: **Ukážka** (stredné skóre) a odkaz **Slabý web** na homepage.
+
+## E2E (Playwright)
+
+```bash
+pnpm test:e2e        # spustí Chromium (+ mobil) proti next dev
+pnpm test:e2e:ui     # interaktívny UI mód
+```
+
+V CI najprv `pnpm build`, potom `CI=1 pnpm test:e2e` (použije `next start`).
+

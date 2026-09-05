@@ -66,7 +66,7 @@ export function ScoreGauge({ score, label }: { score: number; label: string }) {
   const scoreProps = stylex.props(styles.score)
 
   return (
-    <div {...stylex.props(styles.root)}>
+    <div data-testid="score-gauge" data-score={score} {...stylex.props(styles.root)}>
       <svg viewBox="0 0 240 240" {...stylex.props(styles.svg)}>
         {ticks.map((i) => {
           const a = ((i / 40) * 360 - 90) * (Math.PI / 180)

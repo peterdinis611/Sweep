@@ -478,41 +478,67 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
   const prevStrategy = previous?.[strategy]
 
   return (
-    <div {...stylex.props(styles.root)}>
+    <div data-testid="report-view" {...stylex.props(styles.root)}>
       <div {...stylex.props(styles.masthead)}>
         <div {...stylex.props(styles.mastLeft)}>
           <p {...stylex.props(common.kicker)}>{t.report.dossier}</p>
-          <a href={report.finalUrl} {...stylex.props(styles.hostLink)} target="_blank" rel="noreferrer">
+          <a
+            href={report.finalUrl}
+            data-testid="report-host"
+            {...stylex.props(styles.hostLink)}
+            target="_blank"
+            rel="noreferrer"
+          >
             {host}
           </a>
           <p {...stylex.props(styles.meta)}>
             {new Date(report.createdAt).toLocaleString(DATE_LOCALE[locale])}
             <span {...stylex.props(styles.metaSep)}>·</span>
-            <span {...stylex.props(styles.engineBadge)}>{engineLabel}</span>
+            <span data-testid="report-engine" {...stylex.props(styles.engineBadge)}>
+              {engineLabel}
+            </span>
             <span {...stylex.props(styles.metaSep)}>·</span>
-            <a href="/" {...stylex.props(styles.metaLink)}>
+            <a href="/" data-testid="report-new-scan" {...stylex.props(styles.metaLink)}>
               {t.report.newScan}
             </a>
           </p>
         </div>
-        <div {...stylex.props(styles.toolbar, common.noPrint)}>
+        <div data-testid="report-toolbar" {...stylex.props(styles.toolbar, common.noPrint)}>
           <Tabs value={strategy} onValueChange={(value) => setStrategy(value as Strategy)}>
             <TabsList>
-              <TabsTrigger value="mobile" style={styles.tabTrigger}>
+              <TabsTrigger value="mobile" data-testid="tab-mobile" style={styles.tabTrigger}>
                 {t.report.mobile}
               </TabsTrigger>
-              <TabsTrigger value="desktop" style={styles.tabTrigger}>
+              <TabsTrigger value="desktop" data-testid="tab-desktop" style={styles.tabTrigger}>
                 {t.report.desktop}
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button type="button" variant="ghost" style={buttonStyles.roundedNone} onClick={() => exportCsv(report, strategy)}>
+          <Button
+            type="button"
+            variant="ghost"
+            data-testid="export-csv"
+            style={buttonStyles.roundedNone}
+            onClick={() => exportCsv(report, strategy)}
+          >
             <Download size={14} /> CSV
           </Button>
-          <Button type="button" variant="ghost" style={buttonStyles.roundedNone} onClick={() => window.print()}>
+          <Button
+            type="button"
+            variant="ghost"
+            data-testid="export-print"
+            style={buttonStyles.roundedNone}
+            onClick={() => window.print()}
+          >
             <Printer size={14} /> PDF
           </Button>
-          <Button type="button" variant="ghost" style={buttonStyles.roundedNone} onClick={() => void share()}>
+          <Button
+            type="button"
+            variant="ghost"
+            data-testid="share-link"
+            style={buttonStyles.roundedNone}
+            onClick={() => void share()}
+          >
             {copied ? <Check size={14} /> : <Share2 size={14} />}
             {copied ? t.report.copied : t.report.link}
           </Button>
@@ -520,7 +546,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
       </div>
       <Separator />
 
-      <div {...stylex.props(styles.scoreRow)}>
+      <div data-testid="score-row" {...stylex.props(styles.scoreRow)}>
         <ScoreGauge
           score={data.score}
           label={strategy === "mobile" ? t.report.mobile.toLowerCase() : t.report.desktop.toLowerCase()}
@@ -549,7 +575,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </div>
       </div>
 
-      <section>
+      <section data-testid="field-section">
         <SectionTitle index="04" title={t.report.fieldTitle} subtitle={t.report.fieldSub} />
         {report.field.length > 0 ? (
           <div {...stylex.props(styles.metrics)}>
@@ -564,19 +590,21 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
             ))}
           </div>
         ) : (
-          <p {...stylex.props(styles.fieldEmpty)}>{t.report.fieldEmpty}</p>
+          <p data-testid="field-empty" {...stylex.props(styles.fieldEmpty)}>
+            {t.report.fieldEmpty}
+          </p>
         )}
       </section>
 
       {(data.filmstrip.length > 0 || data.screenshot) && (
-        <section>
+        <section data-testid="filmstrip-section">
           <SectionTitle
             index="05"
             title={data.filmstrip.length > 0 ? t.report.filmstripTitle : t.report.screenshotTitle}
             subtitle={t.report.filmstripSub}
           />
           {data.filmstrip.length > 0 ? (
-            <div {...stylex.props(styles.filmstrip)}>
+            <div data-testid="filmstrip" {...stylex.props(styles.filmstrip)}>
               {data.filmstrip.map((f) => (
                 <figure key={`${f.timing}-${f.data.slice(0, 24)}`} {...stylex.props(styles.frame)}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -586,7 +614,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
               ))}
             </div>
           ) : data.screenshot ? (
-            <figure {...stylex.props(styles.shot)}>
+            <figure data-testid="final-screenshot" {...stylex.props(styles.shot)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={data.screenshot} alt="" loading="lazy" decoding="async" {...stylex.props(styles.shotImg)} />
             </figure>
@@ -595,11 +623,11 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
       )}
 
       {fixPlan.length > 0 && (
-        <section>
+        <section data-testid="fix-plan">
           <SectionTitle index="06" title={t.report.fixPlanTitle} subtitle={t.report.fixPlanSub} />
           <div {...stylex.props(styles.fixPlan)}>
             {fixPlan.map((op, i) => (
-              <article key={op.id} {...stylex.props(styles.fixStep)}>
+              <article key={op.id} data-testid={`fix-step-${i + 1}`} {...stylex.props(styles.fixStep)}>
                 <span {...stylex.props(styles.fixIndex)}>{String(i + 1).padStart(2, "0")}</span>
                 <div>
                   <h3 {...stylex.props(styles.fixTitle)}>{op.title}</h3>
@@ -670,7 +698,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </section>
       </div>
 
-      <section>
+      <section data-testid="waterfall-section">
         <SectionTitle index="09" title={t.report.waterfallTitle} subtitle={t.report.waterfallSub} />
         <div {...stylex.props(common.plate, styles.waterfallPad)}>
           <Waterfall items={data.waterfall} />

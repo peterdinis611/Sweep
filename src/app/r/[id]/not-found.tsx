@@ -23,7 +23,11 @@ export default function ReportNotFound() {
       }
       body="Odkaz môže byť starý, identifikátor neplatný, alebo sa report už nezachoval na tomto stroji."
       actions={
-        <Button nativeButton={false} render={<Link href="/" />} style={buttonStyles.roundedNone}>
+        <Button
+          nativeButton={false}
+          render={<Link href="/" data-testid="fault-home-link" />}
+          style={buttonStyles.roundedNone}
+        >
           Nové meranie
         </Button>
       }

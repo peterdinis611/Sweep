@@ -98,7 +98,9 @@ export function SiteHeader() {
             strokeLinecap="round"
           />
         </svg>
-        <span {...stylex.props(styles.name, common.displayFont)}>Sweep</span>
+        <span {...stylex.props(styles.name, common.displayFont)} data-testid="brand">
+          Sweep
+        </span>
       </Link>
       <div {...stylex.props(styles.tools)}>
         {onReport ? (

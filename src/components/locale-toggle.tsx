@@ -43,14 +43,15 @@ export function LocaleToggle() {
   const { locale, setLocale, t } = useI18n()
 
   return (
-    <div role="group" aria-label={t.lang.label} {...stylex.props(styles.group)}>
+    <div role="group" aria-label={t.lang.label} data-testid="locale-toggle" {...stylex.props(styles.group)}>
       {LOCALES.map((code) => (
         <button
           key={code}
           type="button"
-          onClick={() => setLocale(code)}
+          data-testid={`locale-${code}`}
           {...stylex.props(styles.btn, locale === code && styles.active)}
           aria-pressed={locale === code}
+          onClick={() => setLocale(code)}
         >
           {t.lang[code as Locale]}
         </button>

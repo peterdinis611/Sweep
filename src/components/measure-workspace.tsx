@@ -307,7 +307,7 @@ function SearchForm({
 }) {
   const { t } = useI18n()
   return (
-    <div {...(compact ? {} : stylex.props(common.reveal, styles.formReveal))}>
+    <div data-testid="measure-form" {...(compact ? {} : stylex.props(common.reveal, styles.formReveal))}>
       {!compact && <p {...stylex.props(common.kicker, styles.formKicker)}>{t.form.kicker}</p>}
       <form
         {...stylex.props(common.plate)}
@@ -322,6 +322,7 @@ function SearchForm({
         <div {...stylex.props(styles.row)}>
           <Input
             id="sweep-url"
+            data-testid="url-input"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder={t.form.placeholder}
@@ -336,13 +337,20 @@ function SearchForm({
               type="button"
               variant="outline"
               size="lg"
+              data-testid="demo-button"
               disabled={busy}
               onClick={onDemo}
               style={[buttonStyles.roundedNone, styles.demoBtn]}
             >
               {t.form.demo}
             </Button>
-            <Button type="submit" size="lg" disabled={busy} style={[buttonStyles.roundedNone, styles.submitBtn]}>
+            <Button
+              type="submit"
+              size="lg"
+              data-testid="analyze-button"
+              disabled={busy}
+              style={[buttonStyles.roundedNone, styles.submitBtn]}
+            >
               {busy ? (
                 <>
                   <span {...stylex.props(styles.spinIcon)}>
@@ -363,7 +371,7 @@ function SearchForm({
         </div>
       </form>
       {error && (
-        <div {...stylex.props(styles.errorAlert)}>
+        <div {...stylex.props(styles.errorAlert)} data-testid="form-error">
           <Alert variant="destructive">
             <AlertDescription {...stylex.props(styles.alertDesc)}>
               <span {...stylex.props(common.kicker, styles.errorTitle)}>{t.form.errorTitle}</span>
@@ -378,6 +386,7 @@ function SearchForm({
           {" · "}
           <button
             type="button"
+            data-testid="demo-poor-button"
             disabled={busy}
             onClick={onDemoPoor}
             style={{

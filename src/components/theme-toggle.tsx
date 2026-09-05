@@ -42,6 +42,7 @@ export function ThemeToggle() {
       type="button"
       variant="outline"
       size="sm"
+      data-testid="theme-toggle"
       aria-label={dark ? t.theme.toLight : t.theme.toDark}
       style={styles.button}
       onClick={() => {
