@@ -63,6 +63,7 @@ function wrap(lhr: unknown): PsiResponse {
 export async function runLocalPair(
   url: string,
   signal?: AbortSignal,
+  onPhase?: (phase: "mobile" | "desktop") => void,
 ): Promise<{ mobile: PsiResponse; desktop: PsiResponse }> {
   const chromePath = resolveBrowser()
   if (!chromePath) {
@@ -88,6 +89,7 @@ export async function runLocalPair(
       onlyCategories: [...CATEGORIES],
     }
 
+    onPhase?.("mobile")
     const mobileRes = await lighthouse(url, flags)
     if (!mobileRes?.lhr) throw new Error("Lighthouse nevrátil mobilný výsledok.")
     if (mobileRes.lhr.runtimeError?.message) {
@@ -96,6 +98,7 @@ export async function runLocalPair(
 
     if (signal?.aborted) throw new Error("Meranie bolo prerušené.")
 
+    onPhase?.("desktop")
     const desktopRes = await lighthouse(url, flags, desktopSettings as never)
     if (!desktopRes?.lhr) throw new Error("Lighthouse nevrátil desktopový výsledok.")
     if (desktopRes.lhr.runtimeError?.message) {

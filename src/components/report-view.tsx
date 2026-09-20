@@ -4,12 +4,11 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Check, Download, FileDown, Share2 } from "lucide-react"
 import * as stylex from "@stylexjs/stylex"
+import { evaluateBudget, normalizeBudget } from "@/analysis/budget"
 import type { Report, Strategy, StrategyReport } from "@/analysis/types"
-import { DEFAULT_BUDGET } from "@/analysis/types"
 import { formatBytes, formatMs } from "@/analysis/pagespeed"
 import { buildStrategyDelta, deltaTone, formatDelta } from "@/analysis/compare"
 import { buildReportPdf } from "@/analysis/pdf"
-import { evaluateBudget } from "@/analysis/budget"
 import { ScoreGauge, RatingDot } from "./score-gauge"
 import { Waterfall } from "./waterfall"
 import { useOpportunityAnnotations } from "./use-opportunity-annotations"
@@ -510,7 +509,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
   const [copied, setCopied] = useState(false)
   const annotations = useOpportunityAnnotations(report.id)
   const data = report[strategy]
-  const budget = report.budget ?? DEFAULT_BUDGET
+  const budget = normalizeBudget(report.budget)
   const budgetCheck = report.budgetResult?.[strategy] ?? evaluateBudget(data, budget)
   const categories = data.categories ?? {
     performance: data.score,
@@ -642,7 +641,8 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         <p {...stylex.props(styles.budgetTitle, budgetCheck.passed ? common.ratingGood : common.ratingPoor)}>
           {budgetCheck.passed ? t.report.budgetPass : t.report.budgetFail}
           {" · "}
-          {t.report.score} ≥ {budget.minScore} · LCP ≤ {formatMs(budget.maxLcpMs)}
+          {t.report.score} ≥ {budget.minScore} · LCP ≤ {formatMs(budget.maxLcpMs)} · CLS ≤{" "}
+          {budget.maxCls.toFixed(3)} · TBT ≤ {formatMs(budget.maxTbtMs)}
         </p>
         {!budgetCheck.passed && (
           <ul {...stylex.props(styles.budgetList)}>
@@ -710,7 +710,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           </div>
         ) : (
           <p data-testid="field-empty" {...stylex.props(styles.fieldEmpty)}>
-            {t.report.fieldEmpty}
+            {report.engine === "lighthouse" ? t.report.fieldEmptyLab : t.report.fieldEmpty}
           </p>
         )}
       </section>

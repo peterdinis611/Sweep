@@ -38,5 +38,7 @@ test.describe("budget, categories, deep link", () => {
     await page.getByTestId("mode-sitemap").click()
     await expect(page.getByTestId("crawl-limit")).toBeVisible()
     await expect(page.getByTestId("budget-min-score")).toHaveValue("50")
+    await expect(page.getByTestId("budget-max-cls")).toHaveValue("0.25")
+    await expect(page.getByTestId("budget-max-tbt")).toHaveValue("600")
   })
 })

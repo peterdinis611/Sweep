@@ -61,7 +61,11 @@ export type CategoryScores = {
 export type Budget = {
   minScore: number
   maxLcpMs: number
+  maxCls: number
+  maxTbtMs: number
 }
+
+export type ProgressPhase = "verify" | "mobile" | "desktop" | "report" | "field" | "crawl"
 
 export type BudgetFailure = {
   id: string
@@ -129,4 +133,6 @@ export type Crawl = {
 export const DEFAULT_BUDGET: Budget = {
   minScore: 50,
   maxLcpMs: 2500,
+  maxCls: 0.25,
+  maxTbtMs: 600,
 }

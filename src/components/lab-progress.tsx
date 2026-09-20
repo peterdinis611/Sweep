@@ -340,11 +340,15 @@ export function LabProgress({
   labelKey = "",
   url = "",
   elapsedSec = 0,
+  current,
+  total,
 }: {
   pct: number
   labelKey?: ProgressLabelKey | ""
   url?: string
   elapsedSec?: number
+  current?: number
+  total?: number
 }) {
   const { t } = useI18n()
   const active = activeStepIndex(pct)
@@ -362,7 +366,12 @@ export function LabProgress({
   }, [tips.length])
 
   const tip = tips[tipIndex]!
-  const label = labelKey ? t.progress.labels[labelKey] : t.progress.preparing
+  const baseLabel = labelKey ? t.progress.labels[labelKey] : t.progress.preparing
+  const crawlLabel =
+    current != null && total != null
+      ? t.progress.crawlOf.replace("{current}", String(current)).replace("{total}", String(total))
+      : null
+  const label = crawlLabel ? `${crawlLabel} · ${baseLabel}` : baseLabel
   const etaHint =
     elapsedSec < 12
       ? t.progress.etaEarly

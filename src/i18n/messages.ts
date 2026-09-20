@@ -33,6 +33,8 @@ export type Messages = {
     budgetKicker: string
     minScore: string
     maxLcp: string
+    maxCls: string
+    maxTbt: string
     crawlLimit: string
     budgetToggle: string
     budgetHide: string
@@ -54,7 +56,10 @@ export type Messages = {
       report: string
       wait: string
       polish: string
+      field: string
+      crawl: string
     }
+    crawlOf: string
     steps: { title: string; detail: string }[]
     tips: { kicker: string; body: string }[]
   }
@@ -75,6 +80,7 @@ export type Messages = {
     fieldTitle: string
     fieldSub: string
     fieldEmpty: string
+    fieldEmptyLab: string
     filmstripTitle: string
     filmstripSub: string
     screenshotTitle: string
@@ -107,6 +113,24 @@ export type Messages = {
     impactHigh: string
     impactMedium: string
     impactLow: string
+  }
+  crawl: {
+    kicker: string
+    title: string
+    metaBudget: string
+    colUrl: string
+    colMobile: string
+    colDesktop: string
+    colBudget: string
+    report: string
+    newScan: string
+    share: string
+    copied: string
+    csv: string
+    pass: string
+    fail: string
+    err: string
+    notFound: string
   }
   skeleton: {
     improve: string
@@ -146,6 +170,8 @@ export const dictionaries: Record<Locale, Messages> = {
       budgetKicker: "Budget prahy",
       minScore: "Min. skóre",
       maxLcp: "Max. LCP (ms)",
+      maxCls: "Max. CLS",
+      maxTbt: "Max. TBT (ms)",
       crawlLimit: "Počet URL",
       budgetToggle: "Nastaviť budget",
       budgetHide: "Skryť budget",
@@ -167,7 +193,10 @@ export const dictionaries: Record<Locale, Messages> = {
         report: "Skladám report",
         wait: "Ešte chvíľu…",
         polish: "Dolaďujem metriky",
+        field: "Dopĺňam CrUX pole",
+        crawl: "Meriam URL v sitemape",
       },
+      crawlOf: "URL {current}/{total}",
       steps: [
         { title: "Overenie URL", detail: "Kontrolujem dostupnosť a protokol" },
         { title: "Mobilné laboratórium", detail: "Lighthouse · throttled 4G" },
@@ -214,6 +243,7 @@ export const dictionaries: Record<Locale, Messages> = {
       fieldTitle: "Reálni používatelia",
       fieldSub: "Chrome UX Report (CrUX), posledných ~28 dní — nie laboratórium.",
       fieldEmpty: "Pre túto URL CrUX zatiaľ nemá dosť dát. Nižšie sú len laboratórne metriky.",
+      fieldEmptyLab: "Lokálne Lighthouse neobsahuje CrUX (reálnych používateľov). Ak je nastavený PAGESPEED_API_KEY, Sweep skúsi doplniť pole; inak ostávajú len lab metriky.",
       filmstripTitle: "Filmstrip",
       filmstripSub: "Snímky priebehu načítania v laboratóriu.",
       screenshotTitle: "Finálny screenshot",
@@ -246,6 +276,25 @@ export const dictionaries: Record<Locale, Messages> = {
 impactHigh: "vysoký",
       impactMedium: "stredný",
       impactLow: "nízky",
+    },
+    crawl: {
+      kicker: "Sitemap crawl",
+      title: "{count} URL zmeraných",
+      metaBudget:
+        "budget skóre ≥ {minScore}, LCP ≤ {maxLcp} ms, CLS ≤ {maxCls}, TBT ≤ {maxTbt}",
+      colUrl: "URL",
+      colMobile: "Mobil",
+      colDesktop: "Desktop",
+      colBudget: "Budget",
+      report: "Report",
+      newScan: "Nové meranie",
+      share: "Odkaz",
+      copied: "Skopírované",
+      csv: "CSV",
+      pass: "PASS",
+      fail: "FAIL",
+      err: "ERR",
+      notFound: "Crawl sa nenašiel",
     },
     skeleton: {
       improve: "06 — čo zlepšiť",
@@ -283,6 +332,8 @@ impactHigh: "vysoký",
       budgetKicker: "Budget prahy",
       minScore: "Min. skóre",
       maxLcp: "Max. LCP (ms)",
+      maxCls: "Max. CLS",
+      maxTbt: "Max. TBT (ms)",
       crawlLimit: "Počet URL",
       budgetToggle: "Nastavit budget",
       budgetHide: "Skrýt budget",
@@ -304,7 +355,10 @@ impactHigh: "vysoký",
         report: "Skládám report",
         wait: "Ještě chvíli…",
         polish: "Doladění metrik",
+        field: "Doplňuji CrUX pole",
+        crawl: "Měřím URL v sitemapě",
       },
+      crawlOf: "URL {current}/{total}",
       steps: [
         { title: "Ověření URL", detail: "Kontroluji dostupnost a protokol" },
         { title: "Mobilní laboratoř", detail: "Lighthouse · throttled 4G" },
@@ -351,6 +405,7 @@ impactHigh: "vysoký",
       fieldTitle: "Reální uživatelé",
       fieldSub: "Chrome UX Report (CrUX), posledních ~28 dní — ne laboratoř.",
       fieldEmpty: "Pro tuto URL CrUX zatím nemá dost dat. Níže jsou jen laboratorní metriky.",
+      fieldEmptyLab: "Lokální Lighthouse neobsahuje CrUX (reálné uživatele). Pokud je nastaven PAGESPEED_API_KEY, Sweep zkusí pole doplnit; jinak zůstávají jen lab metriky.",
       filmstripTitle: "Filmstrip",
       filmstripSub: "Snímky průběhu načítání v laboratoři.",
       screenshotTitle: "Finální screenshot",
@@ -383,6 +438,25 @@ impactHigh: "vysoký",
 impactHigh: "vysoký",
       impactMedium: "střední",
       impactLow: "nízký",
+    },
+    crawl: {
+      kicker: "Sitemap crawl",
+      title: "{count} URL změřeno",
+      metaBudget:
+        "budget skóre ≥ {minScore}, LCP ≤ {maxLcp} ms, CLS ≤ {maxCls}, TBT ≤ {maxTbt}",
+      colUrl: "URL",
+      colMobile: "Mobil",
+      colDesktop: "Desktop",
+      colBudget: "Budget",
+      report: "Report",
+      newScan: "Nové měření",
+      share: "Odkaz",
+      copied: "Zkopírováno",
+      csv: "CSV",
+      pass: "PASS",
+      fail: "FAIL",
+      err: "ERR",
+      notFound: "Crawl se nenašel",
     },
     skeleton: {
       improve: "06 — co zlepšit",
@@ -420,6 +494,8 @@ impactHigh: "vysoký",
       budgetKicker: "Budget thresholds",
       minScore: "Min. score",
       maxLcp: "Max LCP (ms)",
+      maxCls: "Max CLS",
+      maxTbt: "Max TBT (ms)",
       crawlLimit: "URL count",
       budgetToggle: "Set budget",
       budgetHide: "Hide budget",
@@ -441,7 +517,10 @@ impactHigh: "vysoký",
         report: "Building report",
         wait: "One moment…",
         polish: "Polishing metrics",
+        field: "Fetching CrUX field data",
+        crawl: "Measuring sitemap URL",
       },
+      crawlOf: "URL {current}/{total}",
       steps: [
         { title: "URL check", detail: "Validating availability and protocol" },
         { title: "Mobile lab", detail: "Lighthouse · throttled 4G" },
@@ -488,6 +567,7 @@ impactHigh: "vysoký",
       fieldTitle: "Real users",
       fieldSub: "Chrome UX Report (CrUX), last ~28 days — not the lab run.",
       fieldEmpty: "CrUX does not have enough data for this URL yet. Below are lab metrics only.",
+      fieldEmptyLab: "Local Lighthouse does not include CrUX (real-user) data. With PAGESPEED_API_KEY set, Sweep tries to enrich field metrics; otherwise only lab metrics are shown.",
       filmstripTitle: "Filmstrip",
       filmstripSub: "Lab load-progress thumbnails.",
       screenshotTitle: "Final screenshot",
@@ -520,6 +600,25 @@ impactHigh: "vysoký",
 impactHigh: "high",
       impactMedium: "medium",
       impactLow: "low",
+    },
+    crawl: {
+      kicker: "Sitemap crawl",
+      title: "{count} URLs measured",
+      metaBudget:
+        "budget score ≥ {minScore}, LCP ≤ {maxLcp} ms, CLS ≤ {maxCls}, TBT ≤ {maxTbt}",
+      colUrl: "URL",
+      colMobile: "Mobile",
+      colDesktop: "Desktop",
+      colBudget: "Budget",
+      report: "Report",
+      newScan: "New scan",
+      share: "Link",
+      copied: "Copied",
+      csv: "CSV",
+      pass: "PASS",
+      fail: "FAIL",
+      err: "ERR",
+      notFound: "Crawl not found",
     },
     skeleton: {
       improve: "06 — what to improve",

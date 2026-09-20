@@ -382,13 +382,20 @@ export function buildReport(
   url: string,
   mobileJson: PsiResponse,
   desktopJson: PsiResponse,
-  meta: { engine: Report["engine"]; previousId?: string; budget?: Partial<Budget> } = {
+  meta: {
+    engine: Report["engine"]
+    previousId?: string
+    budget?: Partial<Budget>
+    field?: FieldMetric[]
+  } = {
     engine: "lighthouse",
   },
 ): Report {
   const mobile = parseStrategy(mobileJson)
   const desktop = parseStrategy(desktopJson)
-  const field = parseField(mobileJson).length ? parseField(mobileJson) : parseField(desktopJson)
+  const field =
+    meta.field ??
+    (parseField(mobileJson).length ? parseField(mobileJson) : parseField(desktopJson))
   const finalUrl = mobileJson.lighthouseResult?.finalUrl ?? desktopJson.lighthouseResult?.finalUrl ?? url
   const budget = normalizeBudget(meta.budget ?? DEFAULT_BUDGET)
   return {

@@ -23,6 +23,15 @@ const spin = stylex.keyframes({
 
 type ProgressLabelKey = keyof Messages["progress"]["labels"]
 
+type LiveProgress = {
+  pct: number
+  labelKey: ProgressLabelKey | ""
+  elapsedSec: number
+  url: string
+  current?: number
+  total?: number
+}
+
 function firstValidationMessage(errors: unknown): string | null {
   if (!errors || typeof errors !== "object") return null
   const rec = errors as Record<string, unknown>
@@ -40,44 +49,75 @@ function firstValidationMessage(errors: unknown): string | null {
   return null
 }
 
-function useSimulatedProgress(active: boolean) {
-  const [pct, setPct] = useState(0)
-  const [labelKey, setLabelKey] = useState<ProgressLabelKey | "">("")
-  const [elapsedSec, setElapsedSec] = useState(0)
+function useJobProgress(active: boolean, jobId: string | null, fallbackUrl: string): LiveProgress {
+  const [state, setState] = useState<LiveProgress>({
+    pct: 0,
+    labelKey: "",
+    elapsedSec: 0,
+    url: fallbackUrl,
+  })
 
   useEffect(() => {
     if (!active) {
-      setPct(0)
-      setLabelKey("")
-      setElapsedSec(0)
+      setState({ pct: 0, labelKey: "", elapsedSec: 0, url: fallbackUrl })
       return
     }
     const started = Date.now()
-    const steps: { at: number; pct: number; labelKey: ProgressLabelKey }[] = [
-      { at: 0, pct: 6, labelKey: "verify" },
-      { at: 700, pct: 14, labelKey: "mobile" },
-      { at: 8500, pct: 46, labelKey: "desktop" },
-      { at: 21000, pct: 72, labelKey: "report" },
-      { at: 36000, pct: 88, labelKey: "wait" },
-      { at: 52000, pct: 94, labelKey: "polish" },
-    ]
-    const timers = steps.map((s) =>
-      setTimeout(() => {
-        setPct(s.pct)
-        setLabelKey(s.labelKey)
-      }, s.at),
-    )
-    const tick = setInterval(() => {
-      setElapsedSec(Math.floor((Date.now() - started) / 1000))
-      setPct((p) => (p < 96 ? Math.min(96, p + 0.28) : p))
-    }, 800)
-    return () => {
-      timers.forEach(clearTimeout)
-      clearInterval(tick)
-    }
-  }, [active])
+    setState({ pct: 3, labelKey: "verify", elapsedSec: 0, url: fallbackUrl })
 
-  return { pct, labelKey, elapsedSec }
+    const tick = setInterval(() => {
+      setState((s) => ({
+        ...s,
+        elapsedSec: Math.floor((Date.now() - started) / 1000),
+        // Soft creep only until server reports real progress
+        pct: s.pct < 8 ? s.pct + 0.15 : s.pct,
+      }))
+    }, 800)
+
+    if (!jobId) {
+      // Demo / no job — lightweight simulated phases
+      const steps: { at: number; pct: number; labelKey: ProgressLabelKey }[] = [
+        { at: 0, pct: 8, labelKey: "verify" },
+        { at: 400, pct: 35, labelKey: "mobile" },
+        { at: 900, pct: 70, labelKey: "desktop" },
+        { at: 1400, pct: 92, labelKey: "report" },
+      ]
+      const timers = steps.map((s) =>
+        setTimeout(() => {
+          setState((prev) => ({ ...prev, pct: s.pct, labelKey: s.labelKey }))
+        }, s.at),
+      )
+      return () => {
+        timers.forEach(clearTimeout)
+        clearInterval(tick)
+      }
+    }
+
+    const poll = setInterval(() => {
+      void fetch(`/api/progress/${encodeURIComponent(jobId)}`)
+        .then((r) => r.json())
+        .then((data: { progress?: { phase: ProgressLabelKey; pct: number; url?: string; current?: number; total?: number } | null }) => {
+          const p = data.progress
+          if (!p) return
+          setState((prev) => ({
+            ...prev,
+            pct: Math.max(prev.pct, p.pct),
+            labelKey: p.phase,
+            url: p.url || prev.url || fallbackUrl,
+            current: p.current,
+            total: p.total,
+          }))
+        })
+        .catch(() => undefined)
+    }, 450)
+
+    return () => {
+      clearInterval(tick)
+      clearInterval(poll)
+    }
+  }, [active, jobId, fallbackUrl])
+
+  return state
 }
 
 const styles = stylex.create({
@@ -303,7 +343,7 @@ const styles = stylex.create({
   },
   advanced: {
     display: "grid",
-    gridTemplateColumns: "1fr",
+    gridTemplateColumns: "1fr 1fr",
     gap: "0.75rem",
     padding: "0.85rem",
     borderWidth: 1,
@@ -311,7 +351,7 @@ const styles = stylex.create({
     borderColor: colors.line,
     backgroundColor: "color-mix(in oklab, var(--bg) 40%, transparent)",
     "@media (min-width: 640px)": {
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr",
     },
   },
   advField: {
@@ -366,7 +406,10 @@ export function MeasureWorkspace({
   const [showBudget, setShowBudget] = useState(false)
   const [minScore, setMinScore] = useState("50")
   const [maxLcpMs, setMaxLcpMs] = useState("2500")
+  const [maxCls, setMaxCls] = useState("0.25")
+  const [maxTbtMs, setMaxTbtMs] = useState("600")
   const [crawlLimit, setCrawlLimit] = useState("5")
+  const [jobId, setJobId] = useState<string | null>(null)
 
   useEffect(() => {
     setUrl(initialUrl)
@@ -395,7 +438,7 @@ export function MeasureWorkspace({
   })
 
   const busy = analyze.isPending || demo.isPending || crawl.isPending
-  const progress = useSimulatedProgress(busy)
+  const progress = useJobProgress(busy, jobId, url)
   const showHero = Boolean(hero) && !busy
 
   function changeMode(next: "url" | "sitemap") {
@@ -403,16 +446,29 @@ export function MeasureWorkspace({
     if (next === "sitemap") setShowBudget(true)
   }
 
-  function submit() {
-    const budget = {
+  function budgetPayload() {
+    return {
       minScore: Number(minScore) || 50,
       maxLcpMs: Number(maxLcpMs) || 2500,
+      maxCls: Number(maxCls) || 0.25,
+      maxTbtMs: Number(maxTbtMs) || 600,
     }
+  }
+
+  function submit() {
+    const id = crypto.randomUUID()
+    setJobId(id)
+    const budget = budgetPayload()
     if (mode === "sitemap") {
-      crawl.execute({ url, limit: Number(crawlLimit) || 5, ...budget })
+      crawl.execute({ url, limit: Number(crawlLimit) || 5, jobId: id, ...budget })
     } else {
-      analyze.execute({ url, ...budget })
+      analyze.execute({ url, jobId: id, ...budget })
     }
+  }
+
+  function runDemo(variant: "mid" | "poor") {
+    setJobId(null)
+    demo.execute({ variant })
   }
 
   return (
@@ -433,11 +489,15 @@ export function MeasureWorkspace({
             setMinScore={setMinScore}
             maxLcpMs={maxLcpMs}
             setMaxLcpMs={setMaxLcpMs}
+            maxCls={maxCls}
+            setMaxCls={setMaxCls}
+            maxTbtMs={maxTbtMs}
+            setMaxTbtMs={setMaxTbtMs}
             crawlLimit={crawlLimit}
             setCrawlLimit={setCrawlLimit}
             onSubmit={submit}
-            onDemo={() => demo.execute({ variant: "mid" })}
-            onDemoPoor={() => demo.execute({ variant: "poor" })}
+            onDemo={() => runDemo("mid")}
+            onDemoPoor={() => runDemo("poor")}
           />
         </section>
       ) : (
@@ -456,11 +516,15 @@ export function MeasureWorkspace({
             setMinScore={setMinScore}
             maxLcpMs={maxLcpMs}
             setMaxLcpMs={setMaxLcpMs}
+            maxCls={maxCls}
+            setMaxCls={setMaxCls}
+            maxTbtMs={maxTbtMs}
+            setMaxTbtMs={setMaxTbtMs}
             crawlLimit={crawlLimit}
             setCrawlLimit={setCrawlLimit}
             onSubmit={submit}
-            onDemo={() => demo.execute({ variant: "mid" })}
-            onDemoPoor={() => demo.execute({ variant: "poor" })}
+            onDemo={() => runDemo("mid")}
+            onDemoPoor={() => runDemo("poor")}
           />
         </section>
       )}
@@ -469,8 +533,10 @@ export function MeasureWorkspace({
         <LabProgress
           pct={progress.pct}
           labelKey={progress.labelKey}
-          url={url}
+          url={progress.url || url}
           elapsedSec={progress.elapsedSec}
+          current={progress.current}
+          total={progress.total}
         />
       )}
       {!busy && children}
@@ -495,6 +561,10 @@ function SearchForm({
   setMinScore,
   maxLcpMs,
   setMaxLcpMs,
+  maxCls,
+  setMaxCls,
+  maxTbtMs,
+  setMaxTbtMs,
   crawlLimit,
   setCrawlLimit,
 }: {
@@ -514,6 +584,10 @@ function SearchForm({
   setMinScore: (v: string) => void
   maxLcpMs: string
   setMaxLcpMs: (v: string) => void
+  maxCls: string
+  setMaxCls: (v: string) => void
+  maxTbtMs: string
+  setMaxTbtMs: (v: string) => void
   crawlLimit: string
   setCrawlLimit: (v: string) => void
 }) {
@@ -629,6 +703,33 @@ function SearchForm({
                   max={20000}
                   value={maxLcpMs}
                   onChange={(e) => setMaxLcpMs(e.target.value)}
+                  disabled={busy}
+                  {...stylex.props(styles.advInput)}
+                />
+              </label>
+              <label {...stylex.props(styles.advField)}>
+                <span {...stylex.props(styles.advLabel)}>{t.form.maxCls}</span>
+                <Input
+                  data-testid="budget-max-cls"
+                  type="number"
+                  min={0}
+                  max={2}
+                  step={0.01}
+                  value={maxCls}
+                  onChange={(e) => setMaxCls(e.target.value)}
+                  disabled={busy}
+                  {...stylex.props(styles.advInput)}
+                />
+              </label>
+              <label {...stylex.props(styles.advField)}>
+                <span {...stylex.props(styles.advLabel)}>{t.form.maxTbt}</span>
+                <Input
+                  data-testid="budget-max-tbt"
+                  type="number"
+                  min={50}
+                  max={20000}
+                  value={maxTbtMs}
+                  onChange={(e) => setMaxTbtMs(e.target.value)}
                   disabled={busy}
                   {...stylex.props(styles.advInput)}
                 />

@@ -1,6 +1,6 @@
 import type { Report, StrategyReport } from "@/analysis/types"
 import { DEFAULT_BUDGET } from "@/analysis/types"
-import { evaluateBudget } from "@/analysis/budget"
+import { evaluateBudget, normalizeBudget } from "@/analysis/budget"
 
 function svgFrame(label: string, bg: string, accent = "#0a2458") {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="135" height="240" viewBox="0 0 135 240"><rect width="135" height="240" fill="${bg}"/><rect x="10" y="16" width="115" height="14" rx="2" fill="${accent}" opacity=".35"/><rect x="10" y="40" width="80" height="8" rx="2" fill="#000" opacity=".12"/><rect x="10" y="56" width="115" height="70" rx="3" fill="${accent}" opacity=".18"/><rect x="10" y="140" width="115" height="8" rx="2" fill="#000" opacity=".1"/><rect x="10" y="156" width="90" height="8" rx="2" fill="#000" opacity=".08"/><text x="67" y="220" text-anchor="middle" fill="#666" font-size="11" font-family="ui-monospace,monospace">${label}</text></svg>`
@@ -52,7 +52,7 @@ function strat(
 
 
 function withBudget(report: Omit<Report, "budgetResult"> & { budgetResult?: Report["budgetResult"] }): Report {
-  const budget = report.budget ?? DEFAULT_BUDGET
+  const budget = normalizeBudget(report.budget ?? DEFAULT_BUDGET)
   return {
     ...report,
     budget,
