@@ -272,7 +272,7 @@ export const dictionaries: Record<Locale, Messages> = {
       ],
     },
     report: {
-      dossier: "03 — dossier",
+      dossier: "Laboratórny report",
       newScan: "Nové meranie",
       mobile: "Mobil",
       desktop: "Desktop",
@@ -467,7 +467,7 @@ export const dictionaries: Record<Locale, Messages> = {
       ],
     },
     report: {
-      dossier: "03 — dossier",
+      dossier: "Laboratorní report",
       newScan: "Nové měření",
       mobile: "Mobil",
       desktop: "Desktop",
@@ -662,7 +662,7 @@ export const dictionaries: Record<Locale, Messages> = {
       ],
     },
     report: {
-      dossier: "03 — dossier",
+      dossier: "Lab report",
       newScan: "New scan",
       mobile: "Mobile",
       desktop: "Desktop",

@@ -124,20 +124,32 @@ function useJobProgress(active: boolean, jobId: string | null, fallbackUrl: stri
 const styles = stylex.create({
   heroSection: {
     position: "relative",
-    marginBottom: "4rem",
+    marginBottom: "2.75rem",
     display: "grid",
     alignItems: "end",
-    gap: "2.75rem",
-    paddingTop: "1.75rem",
+    gap: "2rem",
+    paddingTop: "1.1rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      marginBottom: "3.5rem",
+      gap: "2.75rem",
+      paddingTop: "1.75rem",
+    },
     "@media (min-width: 1024px)": {
       gridTemplateColumns: "1.05fr 0.95fr",
       gap: "3.5rem",
       paddingTop: "2.25rem",
+      marginBottom: "4rem",
     },
   },
   compactSection: {
-    marginBottom: "2.5rem",
-    paddingTop: "1.5rem",
+    marginBottom: "1.75rem",
+    paddingTop: "1rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      marginBottom: "2.5rem",
+      paddingTop: "1.5rem",
+    },
   },
   formReveal: {
     animationDelay: "200ms",
@@ -157,31 +169,48 @@ const styles = stylex.create({
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: "0.75rem",
-    paddingInline: "1rem",
-    paddingBlock: "0.85rem",
+    gap: "0.65rem",
+    paddingInline: "0.85rem",
+    paddingBlock: "0.75rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: colors.line,
     background:
       "linear-gradient(180deg, color-mix(in oklab, var(--accent) 6%, transparent), transparent)",
+    "@media (min-width: 640px)": {
+      paddingInline: "1rem",
+      paddingBlock: "0.85rem",
+      gap: "0.75rem",
+    },
   },
   modeSwitch: {
     display: "inline-flex",
     padding: 2,
     gap: 2,
+    width: "100%",
     backgroundColor: "color-mix(in oklab, var(--secondary) 70%, transparent)",
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.line,
+    "@media (min-width: 480px)": {
+      width: "auto",
+    },
   },
   modeBtn: {
     borderRadius: 0,
     borderWidth: 0,
-    minHeight: "2rem",
-    paddingInline: "0.85rem",
-    fontSize: "0.62rem",
-    letterSpacing: "0.14em",
+    minHeight: "2.35rem",
+    flex: "1 1 0",
+    paddingInline: "0.65rem",
+    fontSize: "0.58rem",
+    letterSpacing: "0.12em",
+    "@media (min-width: 480px)": {
+      flex: "0 0 auto",
+      minHeight: "2rem",
+      paddingInline: "0.85rem",
+      fontSize: "0.62rem",
+      letterSpacing: "0.14em",
+    },
   },
   modeActive: {
     backgroundColor: colors.accent,
@@ -202,10 +231,13 @@ const styles = stylex.create({
     },
   },
   body: {
-    padding: "1rem",
+    padding: "0.85rem",
     display: "flex",
     flexDirection: "column",
     gap: "0.85rem",
+    "@media (min-width: 640px)": {
+      padding: "1rem",
+    },
   },
   fieldBlock: {
     display: "flex",
@@ -257,13 +289,16 @@ const styles = stylex.create({
   },
   submitBtn: {
     height: "3.35rem",
-    minWidth: "9.5rem",
+    width: "100%",
+    minWidth: 0,
     borderRadius: 0,
     borderWidth: 0,
     paddingInline: "1.25rem",
     fontSize: "0.72rem",
     letterSpacing: "0.18em",
     "@media (min-width: 640px)": {
+      width: "auto",
+      minWidth: "9.5rem",
       borderLeftWidth: 1,
       borderLeftStyle: "solid",
       borderLeftColor: "color-mix(in oklab, var(--accent-fg) 18%, transparent)",
@@ -288,8 +323,16 @@ const styles = stylex.create({
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
-    gap: "0.35rem 1rem",
-    paddingTop: "0.15rem",
+    justifyContent: "center",
+    gap: "0.55rem 0.85rem",
+    paddingTop: "0.35rem",
+    textAlign: "center",
+  },
+  footSep: {
+    fontFamily: fonts.mono,
+    fontSize: "0.66rem",
+    color: "color-mix(in oklab, var(--muted) 55%, transparent)",
+    userSelect: "none",
   },
   meta: {
     fontFamily: fonts.mono,
@@ -302,7 +345,8 @@ const styles = stylex.create({
     appearance: "none",
     background: "none",
     borderWidth: 0,
-    padding: 0,
+    paddingInline: "0.15rem",
+    paddingBlock: "0.2rem",
     color: "inherit",
     font: "inherit",
     letterSpacing: "inherit",
@@ -325,7 +369,8 @@ const styles = stylex.create({
     appearance: "none",
     background: "none",
     borderWidth: 0,
-    padding: 0,
+    paddingInline: "0.15rem",
+    paddingBlock: "0.2rem",
     fontFamily: fonts.mono,
     fontSize: "0.66rem",
     letterSpacing: "0.08em",
@@ -343,22 +388,41 @@ const styles = stylex.create({
     },
   },
   advanced: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "0.75rem",
-    padding: "0.85rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+    padding: "1rem",
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.line,
     backgroundColor: "color-mix(in oklab, var(--bg) 40%, transparent)",
-    "@media (min-width: 640px)": {
-      gridTemplateColumns: "1fr 1fr 1fr 1fr",
+  },
+  advRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "0.75rem",
+    "@media (min-width: 720px)": {
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    },
+  },
+  advRowLab: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: "0.75rem",
+    "@media (min-width: 480px)": {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    },
+  },
+  advRowLabWide: {
+    "@media (min-width: 720px)": {
+      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     },
   },
   advField: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.35rem",
+    gap: "0.4rem",
+    minWidth: 0,
   },
   advLabel: {
     fontFamily: fonts.mono,
@@ -368,8 +432,71 @@ const styles = stylex.create({
     color: colors.muted,
   },
   advInput: {
-    height: "2.45rem",
+    height: "2.55rem",
     borderRadius: 0,
+    backgroundColor: "color-mix(in oklab, var(--bg) 55%, var(--card))",
+  },
+  advSelect: {
+    height: "2.55rem",
+    width: "100%",
+    borderRadius: 0,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.line,
+    backgroundColor: "color-mix(in oklab, var(--bg) 55%, var(--card))",
+    paddingInline: "0.7rem",
+    paddingRight: "1.75rem",
+    fontFamily: fonts.mono,
+    fontSize: "0.88rem",
+    color: colors.fg,
+    outline: "none",
+    appearance: "none",
+    backgroundImage:
+      "linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%)",
+    backgroundPosition: "calc(100% - 14px) calc(50% - 2px), calc(100% - 9px) calc(50% - 2px)",
+    backgroundSize: "5px 5px, 5px 5px",
+    backgroundRepeat: "no-repeat",
+    transitionProperty: "border-color, box-shadow",
+    transitionDuration: "150ms",
+    ":focus-visible": {
+      borderColor: colors.accent,
+      boxShadow: "0 0 0 2px color-mix(in oklab, var(--accent) 30%, transparent)",
+    },
+    ":disabled": {
+      opacity: 0.5,
+      cursor: "not-allowed",
+    },
+  },
+  budgetSave: {
+    alignSelf: "stretch",
+    height: "2.55rem",
+    borderRadius: 0,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.line,
+    backgroundColor: "color-mix(in oklab, var(--accent) 10%, var(--card))",
+    color: colors.fg,
+    fontFamily: fonts.mono,
+    fontSize: "0.64rem",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    cursor: "pointer",
+    transitionProperty: "background-color, border-color, color",
+    transitionDuration: "150ms",
+    ":hover": {
+      borderColor: colors.accent,
+      color: colors.accent,
+      backgroundColor: "color-mix(in oklab, var(--accent) 14%, var(--card))",
+    },
+    ":disabled": {
+      cursor: "default",
+      opacity: 0.5,
+    },
+  },
+  budgetSaved: {
+    borderColor: colors.good,
+    color: colors.good,
+    backgroundColor: "color-mix(in oklab, var(--good) 12%, var(--card))",
   },
   errorAlert: {
     marginTop: "0.75rem",
@@ -761,120 +888,124 @@ function SearchForm({
 
           {!compact && advancedOpen && (
             <div {...stylex.props(styles.advanced)} data-testid="budget-fields">
-              <label {...stylex.props(styles.advField)}>
-                <span {...stylex.props(styles.advLabel)}>{t.form.minScore}</span>
-                <Input
-                  data-testid="budget-min-score"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={minScore}
-                  onChange={(e) => setMinScore(e.target.value)}
-                  disabled={busy}
-                  {...stylex.props(styles.advInput)}
-                />
-              </label>
-              <label {...stylex.props(styles.advField)}>
-                <span {...stylex.props(styles.advLabel)}>{t.form.maxLcp}</span>
-                <Input
-                  data-testid="budget-max-lcp"
-                  type="number"
-                  min={100}
-                  max={20000}
-                  value={maxLcpMs}
-                  onChange={(e) => setMaxLcpMs(e.target.value)}
-                  disabled={busy}
-                  {...stylex.props(styles.advInput)}
-                />
-              </label>
-              <label {...stylex.props(styles.advField)}>
-                <span {...stylex.props(styles.advLabel)}>{t.form.maxCls}</span>
-                <Input
-                  data-testid="budget-max-cls"
-                  type="number"
-                  min={0}
-                  max={2}
-                  step={0.01}
-                  value={maxCls}
-                  onChange={(e) => setMaxCls(e.target.value)}
-                  disabled={busy}
-                  {...stylex.props(styles.advInput)}
-                />
-              </label>
-              <label {...stylex.props(styles.advField)}>
-                <span {...stylex.props(styles.advLabel)}>{t.form.maxTbt}</span>
-                <Input
-                  data-testid="budget-max-tbt"
-                  type="number"
-                  min={50}
-                  max={20000}
-                  value={maxTbtMs}
-                  onChange={(e) => setMaxTbtMs(e.target.value)}
-                  disabled={busy}
-                  {...stylex.props(styles.advInput)}
-                />
-              </label>
-              {mode === "sitemap" && (
+              <div {...stylex.props(styles.advRow)}>
                 <label {...stylex.props(styles.advField)}>
-                  <span {...stylex.props(styles.advLabel)}>{t.form.crawlLimit}</span>
+                  <span {...stylex.props(styles.advLabel)}>{t.form.minScore}</span>
                   <Input
-                    data-testid="crawl-limit"
+                    data-testid="budget-min-score"
                     type="number"
-                    min={1}
-                    max={8}
-                    value={crawlLimit}
-                    onChange={(e) => setCrawlLimit(e.target.value)}
+                    min={0}
+                    max={100}
+                    value={minScore}
+                    onChange={(e) => setMinScore(e.target.value)}
                     disabled={busy}
-                    {...stylex.props(styles.advInput)}
+                    style={styles.advInput}
                   />
                 </label>
-              )}
-              <label {...stylex.props(styles.advField)}>
-                <span {...stylex.props(styles.advLabel)}>{t.form.throttle}</span>
-                <select
-                  data-testid="throttle-select"
-                  value={throttle}
-                  disabled={busy}
-                  onChange={(e) => setThrottle(e.target.value as ThrottlePreset)}
-                  {...stylex.props(styles.advInput)}
-                  style={{ width: "100%" }}
-                >
-                  <option value="mobileDefault">{t.form.throttleMobile}</option>
-                  <option value="slow4g">{t.form.throttleSlow4g}</option>
-                  <option value="cable">{t.form.throttleCable}</option>
-                  <option value="unthrottled">{t.form.throttleUnthrottled}</option>
-                </select>
-              </label>
-              <label {...stylex.props(styles.advField)}>
-                <span {...stylex.props(styles.advLabel)}>{t.form.runs}</span>
-                <Input
-                  data-testid="runs-input"
-                  type="number"
-                  min={1}
-                  max={5}
-                  value={runs}
-                  onChange={(e) => setRuns(e.target.value)}
-                  disabled={busy}
-                  {...stylex.props(styles.advInput)}
-                />
-              </label>
-              <div {...stylex.props(styles.advField)} style={{ gridColumn: "1 / -1" }}>
-                <button
-                  type="button"
-                  data-testid="budget-save"
-                  disabled={busy}
-                  onClick={onSaveBudget}
-                  {...stylex.props(styles.budgetToggle)}
-                >
-                  {budgetSaved ? t.form.budgetSaved : t.form.budgetSave}
-                </button>
+                <label {...stylex.props(styles.advField)}>
+                  <span {...stylex.props(styles.advLabel)}>{t.form.maxLcp}</span>
+                  <Input
+                    data-testid="budget-max-lcp"
+                    type="number"
+                    min={100}
+                    max={20000}
+                    value={maxLcpMs}
+                    onChange={(e) => setMaxLcpMs(e.target.value)}
+                    disabled={busy}
+                    style={styles.advInput}
+                  />
+                </label>
+                <label {...stylex.props(styles.advField)}>
+                  <span {...stylex.props(styles.advLabel)}>{t.form.maxCls}</span>
+                  <Input
+                    data-testid="budget-max-cls"
+                    type="number"
+                    lang="en"
+                    min={0}
+                    max={2}
+                    step={0.01}
+                    value={maxCls}
+                    onChange={(e) => setMaxCls(e.target.value)}
+                    disabled={busy}
+                    style={styles.advInput}
+                  />
+                </label>
+                <label {...stylex.props(styles.advField)}>
+                  <span {...stylex.props(styles.advLabel)}>{t.form.maxTbt}</span>
+                  <Input
+                    data-testid="budget-max-tbt"
+                    type="number"
+                    min={50}
+                    max={20000}
+                    value={maxTbtMs}
+                    onChange={(e) => setMaxTbtMs(e.target.value)}
+                    disabled={busy}
+                    style={styles.advInput}
+                  />
+                </label>
               </div>
+
+              <div {...stylex.props(styles.advRowLab, mode === "sitemap" && styles.advRowLabWide)}>
+                {mode === "sitemap" && (
+                  <label {...stylex.props(styles.advField)}>
+                    <span {...stylex.props(styles.advLabel)}>{t.form.crawlLimit}</span>
+                    <Input
+                      data-testid="crawl-limit"
+                      type="number"
+                      min={1}
+                      max={8}
+                      value={crawlLimit}
+                      onChange={(e) => setCrawlLimit(e.target.value)}
+                      disabled={busy}
+                      style={styles.advInput}
+                    />
+                  </label>
+                )}
+                <label {...stylex.props(styles.advField)}>
+                  <span {...stylex.props(styles.advLabel)}>{t.form.throttle}</span>
+                  <select
+                    data-testid="throttle-select"
+                    value={throttle}
+                    disabled={busy}
+                    onChange={(e) => setThrottle(e.target.value as ThrottlePreset)}
+                    {...stylex.props(styles.advSelect)}
+                  >
+                    <option value="mobileDefault">{t.form.throttleMobile}</option>
+                    <option value="slow4g">{t.form.throttleSlow4g}</option>
+                    <option value="cable">{t.form.throttleCable}</option>
+                    <option value="unthrottled">{t.form.throttleUnthrottled}</option>
+                  </select>
+                </label>
+                <label {...stylex.props(styles.advField)}>
+                  <span {...stylex.props(styles.advLabel)}>{t.form.runs}</span>
+                  <Input
+                    data-testid="runs-input"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={runs}
+                    onChange={(e) => setRuns(e.target.value)}
+                    disabled={busy}
+                    style={styles.advInput}
+                  />
+                </label>
+              </div>
+
+              <button
+                type="button"
+                data-testid="budget-save"
+                disabled={busy}
+                onClick={onSaveBudget}
+                {...stylex.props(styles.budgetSave, budgetSaved && styles.budgetSaved)}
+              >
+                {budgetSaved ? t.form.budgetSaved : t.form.budgetSave}
+              </button>
             </div>
           )}
 
           {!compact && showStaging && (
             <div {...stylex.props(styles.advanced)} data-testid="staging-fields">
-              <label {...stylex.props(styles.advField)} style={{ gridColumn: "1 / -1" }}>
+              <label {...stylex.props(styles.advField)}>
                 <span {...stylex.props(styles.advLabel)}>{t.form.cookie}</span>
                 <Input
                   data-testid="staging-cookie"
@@ -882,10 +1013,10 @@ function SearchForm({
                   onChange={(e) => setCookie(e.target.value)}
                   disabled={busy}
                   placeholder="session=…"
-                  {...stylex.props(styles.advInput)}
+                  style={styles.advInput}
                 />
               </label>
-              <label {...stylex.props(styles.advField)} style={{ gridColumn: "1 / -1" }}>
+              <label {...stylex.props(styles.advField)}>
                 <span {...stylex.props(styles.advLabel)}>{t.form.authorization}</span>
                 <Input
                   data-testid="staging-auth"
@@ -893,7 +1024,7 @@ function SearchForm({
                   onChange={(e) => setAuthorization(e.target.value)}
                   disabled={busy}
                   placeholder="Bearer …"
-                  {...stylex.props(styles.advInput)}
+                  style={styles.advInput}
                 />
               </label>
             </div>
@@ -910,7 +1041,7 @@ function SearchForm({
               >
                 {t.form.demo}
               </button>
-              <span {...stylex.props(styles.meta)} aria-hidden>
+              <span {...stylex.props(styles.footSep)} aria-hidden>
                 ·
               </span>
               <button
@@ -922,7 +1053,7 @@ function SearchForm({
               >
                 {t.form.demoPoor}
               </button>
-              <span {...stylex.props(styles.meta)} aria-hidden>
+              <span {...stylex.props(styles.footSep)} aria-hidden>
                 ·
               </span>
               <button
@@ -935,7 +1066,7 @@ function SearchForm({
               >
                 {advancedOpen ? t.form.budgetHide : t.form.budgetToggle}
               </button>
-              <span {...stylex.props(styles.meta)} aria-hidden>
+              <span {...stylex.props(styles.footSep)} aria-hidden>
                 ·
               </span>
               <button

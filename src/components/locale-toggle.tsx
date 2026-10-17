@@ -14,11 +14,13 @@ const styles = stylex.create({
     borderColor: colors.line,
   },
   btn: {
-    paddingInline: "0.5rem",
-    paddingBlock: "0.375rem",
+    minHeight: "2.5rem",
+    minWidth: "2.35rem",
+    paddingInline: "0.4rem",
+    paddingBlock: "0.35rem",
     fontFamily: fonts.mono,
-    fontSize: "0.62rem",
-    letterSpacing: "0.16em",
+    fontSize: "0.58rem",
+    letterSpacing: "0.12em",
     textTransform: "uppercase",
     borderWidth: 0,
     cursor: "pointer",
@@ -28,6 +30,14 @@ const styles = stylex.create({
     color: colors.muted,
     ":hover": {
       color: colors.fg,
+    },
+    "@media (min-width: 640px)": {
+      minHeight: "unset",
+      minWidth: "unset",
+      paddingInline: "0.5rem",
+      paddingBlock: "0.375rem",
+      fontSize: "0.62rem",
+      letterSpacing: "0.16em",
     },
   },
   active: {

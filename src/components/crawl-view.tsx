@@ -16,8 +16,13 @@ const styles = stylex.create({
   root: {
     display: "flex",
     flexDirection: "column",
-    gap: "2rem",
-    paddingBottom: "3rem",
+    gap: "1.5rem",
+    paddingBottom: "2rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      gap: "2rem",
+      paddingBottom: "3rem",
+    },
   },
   head: {
     display: "flex",
@@ -27,54 +32,79 @@ const styles = stylex.create({
     gap: "1rem",
   },
   title: {
-    marginTop: "0.75rem",
+    marginTop: "0.65rem",
     fontFamily: fonts.display,
-    fontSize: "2.2rem",
+    fontSize: "clamp(1.65rem, 5vw, 2.2rem)",
     fontWeight: 500,
     letterSpacing: "-0.025em",
-    lineHeight: 1,
+    lineHeight: 1.05,
   },
   meta: {
     marginTop: "0.75rem",
     fontFamily: fonts.mono,
-    fontSize: "0.7rem",
+    fontSize: "0.68rem",
     color: colors.muted,
     letterSpacing: "0.025em",
-    lineHeight: 1.55,
+    lineHeight: 1.6,
+    overflowWrap: "anywhere",
   },
   actions: {
     display: "flex",
     flexWrap: "wrap",
     gap: "0.5rem",
+    width: "100%",
+    "@media (min-width: 480px)": {
+      width: "auto",
+    },
+  },
+  tableShell: {
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
+    scrollbarWidth: "thin",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.line,
+    backgroundColor: colors.card,
   },
   table: {
     width: "100%",
+    minWidth: "36rem",
     borderCollapse: "collapse",
-    fontSize: "0.9rem",
+    fontSize: "0.88rem",
   },
   th: {
     textAlign: "left",
-    padding: "0.75rem 1rem",
+    padding: "0.7rem 0.85rem",
     fontFamily: fonts.mono,
-    fontSize: "0.62rem",
-    letterSpacing: "0.14em",
+    fontSize: "0.6rem",
+    letterSpacing: "0.12em",
     textTransform: "uppercase",
     color: colors.muted,
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: colors.line,
+    whiteSpace: "nowrap",
+    "@media (min-width: 640px)": {
+      padding: "0.75rem 1rem",
+      fontSize: "0.62rem",
+      letterSpacing: "0.14em",
+    },
   },
   td: {
-    padding: "0.85rem 1rem",
+    padding: "0.75rem 0.85rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: colors.line,
     verticalAlign: "top",
+    "@media (min-width: 640px)": {
+      padding: "0.85rem 1rem",
+    },
   },
   url: {
     fontFamily: fonts.mono,
-    fontSize: "0.78rem",
+    fontSize: "0.75rem",
     wordBreak: "break-all",
+    maxWidth: "18rem",
   },
   pass: { color: colors.good, fontWeight: 500 },
   fail: { color: colors.bad, fontWeight: 500 },
@@ -166,7 +196,7 @@ export function CrawlView({ crawl }: { crawl: Crawl }) {
         </div>
       </div>
 
-      <div {...stylex.props(common.plate)}>
+      <div {...stylex.props(styles.tableShell)}>
         <table {...stylex.props(styles.table)}>
           <thead>
             <tr>
@@ -199,9 +229,9 @@ export function CrawlView({ crawl }: { crawl: Crawl }) {
                     <Button
                       nativeButton={false}
                       render={<Link href={`/r/${item.reportId}`} />}
-                      style={buttonStyles.roundedNone}
                       size="sm"
                       variant="outline"
+                      style={buttonStyles.roundedNone}
                     >
                       {t.crawl.report}
                     </Button>
@@ -219,7 +249,7 @@ export function CrawlView({ crawl }: { crawl: Crawl }) {
         <div data-testid="opportunity-matrix">
           <p {...stylex.props(common.kicker)}>{t.crawl.matrixTitle}</p>
           <p {...stylex.props(styles.meta)}>{t.crawl.matrixSub}</p>
-          <div {...stylex.props(common.plate)} style={{ marginTop: "0.75rem" }}>
+          <div {...stylex.props(styles.tableShell)} style={{ marginTop: "0.75rem" }}>
             <table {...stylex.props(styles.table)}>
               <thead>
                 <tr>

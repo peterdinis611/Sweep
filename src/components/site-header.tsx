@@ -12,37 +12,58 @@ import { colors, fonts } from "@/styles/tokens.stylex"
 const styles = stylex.create({
   header: {
     display: "flex",
-    alignItems: "flex-end",
+    alignItems: "center",
     justifyContent: "space-between",
-    gap: "1.5rem",
-    paddingBlock: "1.25rem",
+    gap: "0.75rem",
+    paddingBlock: "0.95rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      alignItems: "flex-end",
+      gap: "1.5rem",
+      paddingBlock: "1.25rem",
+    },
   },
   brand: {
     display: "flex",
     alignItems: "baseline",
-    gap: "0.75rem",
+    gap: "0.55rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      gap: "0.75rem",
+    },
   },
   mark: {
     marginBottom: "0.125rem",
-    width: "1.5rem",
-    height: "1.5rem",
+    width: "1.35rem",
+    height: "1.35rem",
+    flexShrink: 0,
     color: colors.accent,
+    "@media (min-width: 640px)": {
+      width: "1.5rem",
+      height: "1.5rem",
+    },
   },
   name: {
     fontFamily: fonts.display,
-    fontSize: "1.65rem",
+    fontSize: "1.4rem",
     lineHeight: 1,
     letterSpacing: "-0.02em",
+    "@media (min-width: 640px)": {
+      fontSize: "1.65rem",
+    },
   },
   tools: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
     alignItems: "center",
     justifyContent: "flex-end",
-    gap: "0.75rem",
-    paddingBottom: "0.125rem",
+    gap: "0.45rem",
+    paddingBottom: 0,
+    flexShrink: 0,
     "@media (min-width: 640px)": {
       gap: "1rem",
+      paddingBottom: "0.125rem",
+      flexWrap: "wrap",
     },
   },
   newScan: {

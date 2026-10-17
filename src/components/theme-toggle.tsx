@@ -12,15 +12,26 @@ import { fonts } from "@/styles/tokens.stylex"
 const styles = stylex.create({
   button: {
     gap: "0.5rem",
-    paddingInline: "0.625rem",
+    paddingInline: "0.5rem",
+    minWidth: "2.5rem",
+    minHeight: "2.5rem",
+    "@media (min-width: 640px)": {
+      paddingInline: "0.625rem",
+      minWidth: "unset",
+      minHeight: "unset",
+    },
   },
   icon: {
     width: "0.875rem",
     height: "0.875rem",
   },
   label: {
+    display: "none",
     letterSpacing: "0.18em",
     fontFamily: fonts.mono,
+    "@media (min-width: 640px)": {
+      display: "inline",
+    },
   },
 })
 

@@ -12,8 +12,13 @@ const styles = stylex.create({
   section: {
     position: "relative",
     overflow: "hidden",
-    paddingBottom: "2rem",
-    paddingTop: "2rem",
+    paddingBottom: "1.5rem",
+    paddingTop: "1.25rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      paddingBottom: "2rem",
+      paddingTop: "2rem",
+    },
   },
   watermark: {
     pointerEvents: "none",
@@ -22,7 +27,7 @@ const styles = stylex.create({
     top: 0,
     userSelect: "none",
     fontFamily: fonts.display,
-    fontSize: "min(42vw, 14rem)",
+    fontSize: "min(36vw, 14rem)",
     lineHeight: 1,
     color: "color-mix(in oklab, var(--fg) 4%, transparent)",
   },
@@ -30,32 +35,32 @@ const styles = stylex.create({
     position: "relative",
     display: "grid",
     alignItems: "end",
-    gap: "3rem",
+    gap: "2rem",
+    "@media (min-width: 640px)": {
+      gap: "3rem",
+    },
     "@media (min-width: 1024px)": {
       gridTemplateColumns: "1.15fr 0.85fr",
     },
   },
   title: {
-    marginTop: "1.25rem",
+    marginTop: "1rem",
     maxWidth: "36rem",
     fontFamily: fonts.display,
-    fontSize: "2.6rem",
+    fontSize: "clamp(2rem, 8vw, 3rem)",
     fontWeight: 500,
     lineHeight: 0.95,
     letterSpacing: "-0.02em",
-    "@media (min-width: 640px)": {
-      fontSize: "3rem",
-    },
   },
   body: {
-    marginTop: "1.25rem",
+    marginTop: "1rem",
     maxWidth: "28rem",
-    fontSize: "1.05rem",
+    fontSize: "clamp(0.95rem, 2.5vw, 1.05rem)",
     lineHeight: 1.625,
     color: colors.muted,
   },
   actions: {
-    marginTop: "2rem",
+    marginTop: "1.5rem",
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
@@ -63,12 +68,19 @@ const styles = stylex.create({
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.line,
+    maxWidth: "100%",
+    "@media (min-width: 640px)": {
+      marginTop: "2rem",
+    },
   },
   dialWrap: {
     position: "relative",
     marginInline: "auto",
     width: "100%",
-    maxWidth: "20rem",
+    maxWidth: "16rem",
+    "@media (min-width: 640px)": {
+      maxWidth: "20rem",
+    },
     "@media (min-width: 1024px)": {
       justifySelf: "end",
     },

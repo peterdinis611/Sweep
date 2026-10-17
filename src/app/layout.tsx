@@ -146,20 +146,31 @@ const styles = stylex.create({
     display: "flex",
     width: "100%",
     maxWidth: "72rem",
+    minWidth: 0,
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: "0%",
     flexDirection: "column",
-    paddingInline: "1.25rem",
+    paddingLeft: "max(0.85rem, env(safe-area-inset-left))",
+    paddingRight: "max(0.85rem, env(safe-area-inset-right))",
+    "@media (min-width: 480px)": {
+      paddingLeft: "1.25rem",
+      paddingRight: "1.25rem",
+    },
     "@media (min-width: 640px)": {
-      paddingInline: "2rem",
+      paddingLeft: "2rem",
+      paddingRight: "2rem",
     },
   },
   main: {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: "0%",
-    paddingBottom: "5rem",
+    minWidth: 0,
+    paddingBottom: "max(3.5rem, env(safe-area-inset-bottom))",
+    "@media (min-width: 640px)": {
+      paddingBottom: "5rem",
+    },
   },
 })
 

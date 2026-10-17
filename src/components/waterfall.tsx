@@ -45,7 +45,13 @@ const styles = stylex.create({
     height: "0.375rem",
   },
   chart: {
-    minWidth: 680,
+    minWidth: "28rem",
+    "@media (min-width: 640px)": {
+      minWidth: "40rem",
+    },
+    "@media (min-width: 1024px)": {
+      minWidth: "42.5rem",
+    },
   },
   axis: {
     marginBottom: "0.5rem",
@@ -55,8 +61,11 @@ const styles = stylex.create({
     color: colors.muted,
   },
   labelCol: {
-    width: "13rem",
+    width: "8.5rem",
     flexShrink: 0,
+    "@media (min-width: 640px)": {
+      width: "13rem",
+    },
   },
   axisTrack: {
     position: "relative",
@@ -80,10 +89,13 @@ const styles = stylex.create({
   row: {
     display: "flex",
     alignItems: "center",
-    gap: "0.75rem",
+    gap: "0.5rem",
+    "@media (min-width: 640px)": {
+      gap: "0.75rem",
+    },
   },
   url: {
-    width: "13rem",
+    width: "8.5rem",
     flexShrink: 0,
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -91,6 +103,9 @@ const styles = stylex.create({
     fontFamily: fonts.mono,
     fontSize: 11,
     color: colors.muted,
+    "@media (min-width: 640px)": {
+      width: "13rem",
+    },
   },
   barTrack: {
     position: "relative",

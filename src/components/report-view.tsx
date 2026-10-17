@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonStyles } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -36,65 +35,118 @@ const DATE_LOCALE: Record<Locale, string> = {
   en: "en-GB",
 }
 
+const rise = stylex.keyframes({
+  from: { opacity: 0, transform: "translateY(10px)" },
+  to: { opacity: 1, transform: "translateY(0)" },
+})
+
 const styles = stylex.create({
   root: {
     display: "flex",
     flexDirection: "column",
-    gap: "4rem",
+    gap: "2.25rem",
+    paddingBottom: "1rem",
+    minWidth: 0,
+    "@media (min-width: 640px)": {
+      gap: "3.25rem",
+    },
   },
   masthead: {
     display: "flex",
     flexWrap: "wrap",
-    alignItems: "flex-end",
+    alignItems: "stretch",
     justifyContent: "space-between",
-    gap: "1.5rem",
-    paddingBottom: "2rem",
+    gap: "1rem",
+    paddingBottom: "0.25rem",
+    animationName: rise,
+    animationDuration: "0.55s",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
+    "@media (min-width: 640px)": {
+      alignItems: "flex-end",
+      gap: "1.5rem",
+    },
   },
   mastLeft: {
     minWidth: 0,
+    flex: "1 1 14rem",
   },
   hostLink: {
-    marginTop: "0.75rem",
+    marginTop: "0.65rem",
     display: "block",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+    maxWidth: "100%",
     fontFamily: fonts.display,
-    fontSize: "2.1rem",
+    fontSize: "clamp(1.45rem, 5vw, 2.35rem)",
     fontWeight: 500,
-    lineHeight: 1,
-    letterSpacing: "-0.025em",
-    ":hover": {
-      color: colors.accent,
-    },
-  },
-  meta: {
-    marginTop: "0.75rem",
-    fontFamily: fonts.mono,
-    fontSize: "0.7rem",
-    letterSpacing: "0.025em",
-    color: colors.muted,
-  },
-  metaSep: {
-    marginInline: "0.5rem",
-    color: colors.line,
-  },
-  metaLink: {
-    color: colors.muted,
+    lineHeight: 1.05,
+    letterSpacing: "-0.03em",
     transitionProperty: "color",
     transitionDuration: "150ms",
     ":hover": {
       color: colors.accent,
     },
   },
-  toolbar: {
+  meta: {
+    marginTop: "0.85rem",
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
+    gap: "0.4rem 0.55rem",
+    fontFamily: fonts.mono,
+    fontSize: "0.65rem",
+    letterSpacing: "0.03em",
+    color: colors.muted,
+    "@media (min-width: 640px)": {
+      fontSize: "0.68rem",
+      gap: "0.45rem 0.65rem",
+    },
+  },
+  metaSep: {
+    color: colors.line,
+    display: "none",
+    "@media (min-width: 640px)": {
+      display: "inline",
+    },
+  },
+  metaLink: {
+    color: colors.muted,
+    textDecoration: "underline",
+    textUnderlineOffset: "0.2em",
+    textDecorationColor: "color-mix(in oklab, var(--muted) 40%, transparent)",
+    transitionProperty: "color, text-decoration-color",
+    transitionDuration: "150ms",
+    ":hover": {
+      color: colors.accent,
+      textDecorationColor: colors.accent,
+    },
+  },
+  toolbar: {
+    display: "flex",
+    flexWrap: "nowrap",
+    alignItems: "center",
     gap: 1,
+    maxWidth: "100%",
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.line,
+    backgroundColor: colors.card,
+    boxShadow: "0 12px 32px -28px var(--glow)",
+    scrollbarWidth: "thin",
+    "@media (min-width: 768px)": {
+      flexWrap: "wrap",
+      overflowX: "visible",
+    },
+  },
+  toolLabel: {
+    display: "none",
+    "@media (min-width: 640px)": {
+      display: "inline",
+    },
   },
   tabTrigger: {
     borderRadius: 0,
@@ -103,16 +155,26 @@ const styles = stylex.create({
     position: "relative",
     display: "grid",
     alignItems: "center",
-    gap: "2.5rem",
+    gap: "1.5rem",
+    minWidth: 0,
+    animationName: rise,
+    animationDuration: "0.6s",
+    animationDelay: "80ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
+    "@media (min-width: 640px)": {
+      gap: "2rem",
+    },
     "@media (min-width: 1024px)": {
-      gridTemplateColumns: "17rem 1fr",
-      gap: "3.5rem",
+      gridTemplateColumns: "16.5rem 1fr",
+      gap: "2.75rem",
     },
   },
   metrics: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: 1,
+    minWidth: 0,
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.line,
@@ -123,40 +185,53 @@ const styles = stylex.create({
   },
   cell: {
     backgroundColor: colors.card,
-    paddingInline: "1rem",
-    paddingBlock: "1.25rem",
+    paddingInline: "0.8rem",
+    paddingBlock: "0.95rem",
+    minWidth: 0,
+    transitionProperty: "background-color",
+    transitionDuration: "150ms",
+    ":hover": {
+      backgroundColor: "color-mix(in oklab, var(--accent) 5%, var(--card))",
+    },
+    "@media (min-width: 640px)": {
+      paddingInline: "1.05rem",
+      paddingBlock: "1.15rem",
+    },
   },
   cellKicker: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
+    gap: "0.45rem",
+    flexWrap: "wrap",
   },
   cellValue: {
-    marginTop: "0.75rem",
+    marginTop: "0.85rem",
     fontFamily: fonts.display,
-    fontSize: "1.85rem",
+    fontSize: "clamp(1.55rem, 2.5vw, 1.95rem)",
     lineHeight: 1,
+    letterSpacing: "-0.02em",
     fontFeatureSettings: '"tnum"',
   },
   cellValueSm: {
-    marginTop: "0.75rem",
+    marginTop: "0.85rem",
     fontFamily: fonts.display,
-    fontSize: "1.5rem",
+    fontSize: "1.45rem",
+    letterSpacing: "-0.02em",
     fontFeatureSettings: '"tnum"',
   },
-  cellHint: {
-    marginTop: "0.5rem",
+  cellHintLoose: {
+    marginTop: "0.55rem",
     fontFamily: fonts.mono,
     fontSize: "0.62rem",
-    letterSpacing: "0.025em",
+    letterSpacing: "0.04em",
     color: colors.muted,
   },
-  cellHintLoose: {
-    marginTop: "0.5rem",
-    fontFamily: fonts.mono,
-    fontSize: "0.65rem",
-    letterSpacing: "0.025em",
-    color: colors.muted,
+  block: {
+    animationName: rise,
+    animationDuration: "0.55s",
+    animationDelay: "120ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
   },
   filmstrip: {
     display: "flex",
@@ -229,29 +304,39 @@ const styles = stylex.create({
     color: colors.muted,
   },
   accordionTrigger: {
-    paddingInline: "1.25rem",
-    paddingBlock: "1rem",
+    paddingInline: "0.95rem",
+    paddingBlock: "0.9rem",
+    "@media (min-width: 640px)": {
+      paddingInline: "1.25rem",
+      paddingBlock: "1rem",
+    },
   },
   accordionContent: {
-    paddingInline: "1.25rem",
+    paddingInline: "0.95rem",
     paddingBottom: "1rem",
     fontSize: "0.875rem",
     lineHeight: 1.625,
     color: colors.muted,
     "@media (min-width: 640px)": {
+      paddingInline: "1.25rem",
       paddingLeft: "6.5rem",
     },
   },
   strengthRow: {
     display: "flex",
-    gap: "1rem",
-    paddingInline: "1.25rem",
-    paddingBlock: "1rem",
+    gap: "0.75rem",
+    paddingInline: "0.95rem",
+    paddingBlock: "0.9rem",
     borderBottomWidth: 1,
     borderBottomStyle: "solid",
     borderBottomColor: colors.line,
     ":last-child": {
       borderBottomWidth: 0,
+    },
+    "@media (min-width: 640px)": {
+      gap: "1rem",
+      paddingInline: "1.25rem",
+      paddingBlock: "1rem",
     },
   },
   strengthIcon: {
@@ -288,33 +373,41 @@ const styles = stylex.create({
     lineHeight: 1.625,
     color: colors.muted,
   },
-  waterfallPad: {
-    padding: "1.25rem",
-  },
   sectionTitle: {
-    marginBottom: "1.25rem",
+    marginBottom: "1.15rem",
     display: "flex",
     flexWrap: "wrap",
     alignItems: "flex-end",
     justifyContent: "space-between",
-    gap: "0.75rem",
+    gap: "0.75rem 1.5rem",
   },
   sectionKicker: {
-    marginBottom: "0.5rem",
+    marginBottom: "0.4rem",
+    opacity: 0.7,
   },
   sectionHeading: {
     fontFamily: fonts.display,
-    fontSize: "1.85rem",
+    fontSize: "clamp(1.55rem, 3vw, 1.9rem)",
     fontWeight: 500,
-    lineHeight: 1,
-    letterSpacing: "-0.025em",
+    lineHeight: 1.05,
+    letterSpacing: "-0.03em",
   },
   sectionSub: {
-    maxWidth: "24rem",
-    fontFamily: fonts.mono,
-    fontSize: "0.68rem",
-    letterSpacing: "0.025em",
+    maxWidth: "100%",
+    fontFamily: fonts.body,
+    fontSize: "0.85rem",
+    lineHeight: 1.45,
     color: colors.muted,
+    "@media (min-width: 640px)": {
+      maxWidth: "22rem",
+      fontSize: "0.88rem",
+    },
+  },
+  waterfallPad: {
+    padding: "0.85rem",
+    "@media (min-width: 640px)": {
+      padding: "1.25rem",
+    },
   },
   tooltipTrigger: {
     cursor: "help",
@@ -333,7 +426,15 @@ const styles = stylex.create({
     paddingInline: 0,
   },
   tableWrap: {
-    overflow: "hidden",
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
+    scrollbarWidth: "thin",
+  },
+  lhrDesktop: {
+    display: "none",
+    "@media (min-width: 768px)": {
+      display: "inline-flex",
+    },
   },
   tableRowHead: {
     borderTopWidth: 0,
@@ -362,10 +463,15 @@ const styles = stylex.create({
     color: colors.muted,
   },
   labTag: {
-    marginLeft: "0.35rem",
+    marginLeft: "0.15rem",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: colors.line,
+    paddingInline: "0.35rem",
+    paddingBlock: "0.1rem",
     fontFamily: fonts.mono,
-    fontSize: "0.55rem",
-    letterSpacing: "0.08em",
+    fontSize: "0.52rem",
+    letterSpacing: "0.1em",
     textTransform: "uppercase",
     color: colors.muted,
   },
@@ -380,18 +486,27 @@ const styles = stylex.create({
   },
   fixStep: {
     display: "grid",
-    gridTemplateColumns: "2.5rem 1fr auto",
-    gap: "1rem",
+    gridTemplateColumns: "2rem 1fr",
+    gap: "0.75rem 0.85rem",
     alignItems: "start",
     backgroundColor: colors.card,
-    paddingInline: "1.25rem",
-    paddingBlock: "1.1rem",
+    paddingInline: "0.95rem",
+    paddingBlock: "0.95rem",
+    "@media (min-width: 640px)": {
+      gridTemplateColumns: "2.5rem 1fr auto",
+      gap: "1rem",
+      paddingInline: "1.25rem",
+      paddingBlock: "1.1rem",
+    },
   },
   fixIndex: {
     fontFamily: fonts.display,
-    fontSize: "1.6rem",
+    fontSize: "1.35rem",
     lineHeight: 1,
     color: colors.accent,
+    "@media (min-width: 640px)": {
+      fontSize: "1.6rem",
+    },
   },
   fixTitle: {
     fontWeight: 500,
@@ -411,11 +526,16 @@ const styles = stylex.create({
     color: colors.muted,
   },
   fixSave: {
+    gridColumn: "2 / -1",
     fontFamily: fonts.mono,
     fontSize: "0.72rem",
     letterSpacing: "0.04em",
     color: colors.accent,
     whiteSpace: "nowrap",
+    "@media (min-width: 640px)": {
+      gridColumn: "auto",
+      justifySelf: "end",
+    },
   },
   shot: {
     maxWidth: "22rem",
@@ -444,34 +564,70 @@ const styles = stylex.create({
     backgroundColor: colors.card,
   },
   budgetPass: {
+    display: "grid",
+    gap: "0.55rem",
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.good,
-    backgroundColor: "color-mix(in oklab, var(--good) 12%, var(--card))",
-    paddingInline: "1.25rem",
-    paddingBlock: "1rem",
+    borderLeftWidth: 3,
+    backgroundColor: "color-mix(in oklab, var(--good) 10%, var(--card))",
+    paddingInline: "0.95rem",
+    paddingBlock: "0.95rem",
+    animationName: rise,
+    animationDuration: "0.55s",
+    animationDelay: "40ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
+    "@media (min-width: 640px)": {
+      paddingInline: "1.2rem",
+      paddingBlock: "1.05rem",
+    },
   },
   budgetFail: {
+    display: "grid",
+    gap: "0.55rem",
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: colors.bad,
-    backgroundColor: "color-mix(in oklab, var(--bad) 10%, var(--card))",
-    paddingInline: "1.25rem",
-    paddingBlock: "1rem",
+    borderLeftWidth: 3,
+    backgroundColor: "color-mix(in oklab, var(--bad) 9%, var(--card))",
+    paddingInline: "0.95rem",
+    paddingBlock: "0.95rem",
+    animationName: rise,
+    animationDuration: "0.55s",
+    animationDelay: "40ms",
+    animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+    animationFillMode: "both",
+    "@media (min-width: 640px)": {
+      paddingInline: "1.2rem",
+      paddingBlock: "1.05rem",
+    },
   },
-  budgetTitle: {
+  budgetStatus: {
+    fontFamily: fonts.display,
+    fontSize: "clamp(1.15rem, 3.5vw, 1.35rem)",
+    fontWeight: 500,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.1,
+  },
+  budgetLimits: {
     fontFamily: fonts.mono,
-    fontSize: "0.68rem",
-    letterSpacing: "0.14em",
-    textTransform: "uppercase",
+    fontSize: "0.62rem",
+    letterSpacing: "0.04em",
+    color: colors.muted,
+    lineHeight: 1.55,
+    overflowWrap: "anywhere",
+    "@media (min-width: 640px)": {
+      fontSize: "0.66rem",
+    },
   },
   budgetList: {
-    marginTop: "0.5rem",
+    marginTop: "0.15rem",
     marginBottom: 0,
-    paddingLeft: "1.1rem",
-    fontSize: "0.88rem",
-    lineHeight: 1.5,
-    color: colors.muted,
+    paddingLeft: "1.05rem",
+    fontSize: "0.9rem",
+    lineHeight: 1.55,
+    color: colors.fg,
   },
   catGrid: {
     display: "grid",
@@ -484,6 +640,14 @@ const styles = stylex.create({
     "@media (min-width: 640px)": {
       gridTemplateColumns: "repeat(4, 1fr)",
     },
+  },
+  catValue: {
+    marginTop: "0.75rem",
+    fontFamily: fonts.display,
+    fontSize: "2rem",
+    lineHeight: 1,
+    letterSpacing: "-0.03em",
+    fontFeatureSettings: '"tnum"',
   },
   fixedBtn: {
     marginTop: "0.75rem",
@@ -606,19 +770,23 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
             type="button"
             variant="ghost"
             data-testid="export-csv"
+            aria-label="CSV"
             style={buttonStyles.roundedNone}
             onClick={() => exportCsv(report, strategy)}
           >
-            <Download size={14} /> CSV
+            <Download size={14} />
+            <span {...stylex.props(styles.toolLabel)}>CSV</span>
           </Button>
           <Button
             type="button"
             variant="ghost"
             data-testid="export-pdf"
+            aria-label="PDF"
             style={buttonStyles.roundedNone}
             onClick={downloadPdf}
           >
-            <FileDown size={14} /> PDF
+            <FileDown size={14} />
+            <span {...stylex.props(styles.toolLabel)}>PDF</span>
           </Button>
           {report.hasRawLhr && (
             <>
@@ -627,18 +795,22 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
                 render={<a href={`/api/lhr/${report.id}/mobile`} download />}
                 variant="ghost"
                 data-testid="export-lhr-mobile"
+                aria-label={t.report.lhrMobile}
                 style={buttonStyles.roundedNone}
               >
-                <Download size={14} /> {t.report.lhrMobile}
+                <Download size={14} />
+                <span {...stylex.props(styles.toolLabel)}>{t.report.lhrMobile}</span>
               </Button>
               <Button
                 nativeButton={false}
                 render={<a href={`/api/lhr/${report.id}/desktop`} download />}
                 variant="ghost"
                 data-testid="export-lhr-desktop"
-                style={buttonStyles.roundedNone}
+                aria-label={t.report.lhrDesktop}
+                style={[buttonStyles.roundedNone, styles.lhrDesktop]}
               >
-                <Download size={14} /> {t.report.lhrDesktop}
+                <Download size={14} />
+                <span {...stylex.props(styles.toolLabel)}>{t.report.lhrDesktop}</span>
               </Button>
             </>
           )}
@@ -646,16 +818,15 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
             type="button"
             variant="ghost"
             data-testid="share-link"
+            aria-label={copied ? t.report.copied : t.report.link}
             style={buttonStyles.roundedNone}
             onClick={() => void share()}
           >
             {copied ? <Check size={14} /> : <Share2 size={14} />}
-            {copied ? t.report.copied : t.report.link}
+            <span {...stylex.props(styles.toolLabel)}>{copied ? t.report.copied : t.report.link}</span>
           </Button>
         </div>
       </div>
-      <Separator />
-
       {data.runStats && data.runStats.runs > 1 && (
         <div data-testid="run-stats" {...stylex.props(styles.fieldEmpty)}>
           <span {...stylex.props(common.kicker)}>{t.report.runStatsTitle}</span>
@@ -672,11 +843,17 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         data-testid="budget-banner"
         {...stylex.props(budgetCheck.passed ? styles.budgetPass : styles.budgetFail)}
       >
-        <p {...stylex.props(styles.budgetTitle, budgetCheck.passed ? common.ratingGood : common.ratingPoor)}>
+        <p {...stylex.props(styles.budgetStatus, budgetCheck.passed ? common.ratingGood : common.ratingPoor)}>
           {budgetCheck.passed ? t.report.budgetPass : t.report.budgetFail}
+        </p>
+        <p {...stylex.props(styles.budgetLimits)}>
+          {t.report.score} ≥ {budget.minScore}
           {" · "}
-          {t.report.score} ≥ {budget.minScore} · LCP ≤ {formatMs(budget.maxLcpMs)} · CLS ≤{" "}
-          {budget.maxCls.toFixed(3)} · TBT ≤ {formatMs(budget.maxTbtMs)}
+          LCP ≤ {formatMs(budget.maxLcpMs)}
+          {" · "}
+          CLS ≤ {budget.maxCls.toFixed(3)}
+          {" · "}
+          TBT ≤ {formatMs(budget.maxTbtMs)}
         </p>
         {!budgetCheck.passed && (
           <ul {...stylex.props(styles.budgetList)}>
@@ -706,7 +883,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           <MetricCell title="FCP" hint="First Contentful Paint" metric={data.fcp} lab={t.report.labBadge} />
           <MetricCell title="TTFB" hint="Time to First Byte" metric={data.ttfb} lab={t.report.labBadge} />
           <article {...stylex.props(styles.cell)}>
-            <p {...stylex.props(common.kicker)}>
+            <p {...stylex.props(common.kicker, styles.cellKicker)}>
               {t.report.transfer}
               <span {...stylex.props(styles.labTag)}>{t.report.labBadge}</span>
             </p>
@@ -718,8 +895,8 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </div>
       </div>
 
-      <section data-testid="categories-section">
-        <SectionTitle index="03b" title={t.report.categoriesTitle} subtitle={t.report.categoriesSub} />
+      <section data-testid="categories-section" {...stylex.props(styles.block)}>
+        <SectionTitle index="03" title={t.report.categoriesTitle} subtitle={t.report.categoriesSub} />
         <div {...stylex.props(styles.catGrid)}>
           <CatCell label="Performance" value={categories.performance} />
           <CatCell label="Accessibility" value={categories.accessibility} />
@@ -728,8 +905,8 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </div>
       </section>
 
-      <section data-testid="critical-path-section">
-        <SectionTitle index="03c" title={t.report.criticalTitle} subtitle={t.report.criticalSub} />
+      <section data-testid="critical-path-section" {...stylex.props(styles.block)}>
+        <SectionTitle index="04" title={t.report.criticalTitle} subtitle={t.report.criticalSub} />
         {data.criticalPath && (data.criticalPath.lcpElement || data.criticalPath.requests.length > 0) ? (
           <div {...stylex.props(common.plate)} style={{ padding: "1rem" }}>
             {data.criticalPath.lcpElement && (
@@ -753,8 +930,8 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         )}
       </section>
 
-      <section data-testid="field-section">
-        <SectionTitle index="04" title={t.report.fieldTitle} subtitle={t.report.fieldSub} />
+      <section data-testid="field-section" {...stylex.props(styles.block)}>
+        <SectionTitle index="05" title={t.report.fieldTitle} subtitle={t.report.fieldSub} />
         {report.field.length > 0 ? (
           <div {...stylex.props(styles.metrics)}>
             {report.field.map((f) => (
@@ -777,7 +954,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
       {(data.filmstrip.length > 0 || data.screenshot) && (
         <section data-testid="filmstrip-section">
           <SectionTitle
-            index="05"
+            index="06"
             title={data.filmstrip.length > 0 ? t.report.filmstripTitle : t.report.screenshotTitle}
             subtitle={t.report.filmstripSub}
           />
@@ -802,7 +979,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
 
       {fixPlan.length > 0 && (
         <section data-testid="fix-plan">
-          <SectionTitle index="06" title={t.report.fixPlanTitle} subtitle={t.report.fixPlanSub} />
+          <SectionTitle index="07" title={t.report.fixPlanTitle} subtitle={t.report.fixPlanSub} />
           <div {...stylex.props(styles.fixPlan)}>
             {fixPlan.map((op, i) => (
               <article key={op.id} data-testid={`fix-step-${i + 1}`} {...stylex.props(styles.fixStep)}>
@@ -823,7 +1000,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
 
       <div {...stylex.props(styles.split)}>
         <section>
-          <SectionTitle index="07" title={t.report.improveTitle} subtitle={t.report.improveSub} />
+          <SectionTitle index="08" title={t.report.improveTitle} subtitle={t.report.improveSub} />
           <div {...stylex.props(common.plate)}>
             {data.opportunities.length === 0 ? (
               <p {...stylex.props(styles.empty)}>{t.report.improveEmpty}</p>
@@ -873,7 +1050,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </section>
 
         <section>
-          <SectionTitle index="08" title={t.report.goodTitle} subtitle={t.report.goodSub} />
+          <SectionTitle index="09" title={t.report.goodTitle} subtitle={t.report.goodSub} />
           <div {...stylex.props(common.plate)}>
             {strengths.length === 0 ? (
               <p {...stylex.props(styles.empty)}>{t.report.goodEmpty}</p>
@@ -896,7 +1073,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
       </div>
 
       <section data-testid="waterfall-section">
-        <SectionTitle index="09" title={t.report.waterfallTitle} subtitle={t.report.waterfallSub} />
+        <SectionTitle index="10" title={t.report.waterfallTitle} subtitle={t.report.waterfallSub} />
         <div {...stylex.props(common.plate, styles.waterfallPad)}>
           <Waterfall items={data.waterfall} />
         </div>
@@ -935,7 +1112,7 @@ function MetricCell({
   lab?: string
 }) {
   return (
-    <article {...stylex.props(styles.cell)}>
+    <article {...stylex.props(styles.cell)} title={hint}>
       <p {...stylex.props(common.kicker, styles.cellKicker)}>
         <RatingDot rating={metric.rating} />
         <Tooltip>
@@ -945,7 +1122,6 @@ function MetricCell({
         {lab && <span {...stylex.props(styles.labTag)}>{lab}</span>}
       </p>
       <p {...stylex.props(styles.cellValue, ratingStyle(metric.rating))}>{metric.display}</p>
-      <p {...stylex.props(styles.cellHint)}>{hint}</p>
     </article>
   )
 }
@@ -955,7 +1131,7 @@ function CatCell({ label, value }: { label: string; value: number | null }) {
   return (
     <article {...stylex.props(styles.cell)}>
       <p {...stylex.props(common.kicker)}>{label}</p>
-      <p {...stylex.props(styles.cellValue, tone ? ratingStyle(tone) : undefined)}>
+      <p {...stylex.props(styles.catValue, tone ? ratingStyle(tone) : undefined)}>
         {value == null ? "—" : value}
       </p>
     </article>
@@ -992,7 +1168,7 @@ function AbCompare({
   return (
     <section>
       <SectionTitle
-        index="10"
+        index="11"
         title={t.report.abTitle}
         subtitle={`${t.report.abSub} (${new Date(previousAt).toLocaleString(DATE_LOCALE[locale])})`}
       />
@@ -1054,7 +1230,7 @@ function Compare({ mobile, desktop }: { mobile: StrategyReport; desktop: Strateg
   )
   return (
     <section>
-      <SectionTitle index="11" title={t.report.compareTitle} subtitle={t.report.compareSub} />
+      <SectionTitle index="12" title={t.report.compareTitle} subtitle={t.report.compareSub} />
       <div {...stylex.props(common.plate, styles.tableWrap)}>
         <Table>
           <TableHeader>

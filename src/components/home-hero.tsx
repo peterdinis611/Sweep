@@ -22,12 +22,12 @@ const styles = stylex.create({
     animationFillMode: "both",
   },
   title: {
-    marginTop: "1rem",
-    maxWidth: "11ch",
+    marginTop: "0.85rem",
+    maxWidth: "12ch",
     fontFamily: fonts.display,
-    fontSize: "clamp(2.75rem, 7vw, 4.75rem)",
+    fontSize: "clamp(2.35rem, 9vw, 4.75rem)",
     fontWeight: 500,
-    lineHeight: 0.9,
+    lineHeight: 0.92,
     letterSpacing: "-0.035em",
     animationName: rise,
     animationDuration: "0.75s",
@@ -41,9 +41,9 @@ const styles = stylex.create({
     fontWeight: 400,
   },
   lead: {
-    marginTop: "1.75rem",
+    marginTop: "1.25rem",
     maxWidth: "22rem",
-    fontSize: "1.05rem",
+    fontSize: "clamp(0.95rem, 2.8vw, 1.05rem)",
     lineHeight: 1.65,
     color: colors.muted,
     animationName: rise,
@@ -51,9 +51,12 @@ const styles = stylex.create({
     animationDelay: "150ms",
     animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
     animationFillMode: "both",
+    "@media (min-width: 640px)": {
+      marginTop: "1.75rem",
+    },
   },
   rule: {
-    marginTop: "2.25rem",
+    marginTop: "1.5rem",
     width: "4.5rem",
     height: 2,
     backgroundColor: colors.accent,
@@ -62,6 +65,9 @@ const styles = stylex.create({
     animationDelay: "210ms",
     animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
     animationFillMode: "both",
+    "@media (min-width: 640px)": {
+      marginTop: "2.25rem",
+    },
   },
 })
 
