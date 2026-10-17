@@ -10,6 +10,8 @@ import { saveReport } from "@/analysis/store"
 import { DEFAULT_BUDGET } from "@/analysis/types"
 import { normalizeBudget } from "@/analysis/budget"
 import { evaluateBudget } from "@/analysis/budget"
+import { loadProjectBudget, saveProjectBudget } from "@/analysis/budget-file"
+import { listRecentLabs } from "@/analysis/labs"
 
 const budgetSchema = z.object({
   minScore: z.coerce.number().min(0).max(100).optional(),
@@ -19,6 +21,7 @@ const budgetSchema = z.object({
 })
 
 const jobIdSchema = z.string().trim().min(8).max(80).optional()
+const throttleSchema = z.enum(["mobileDefault", "slow4g", "cable", "unthrottled"]).optional()
 
 const analyzeSchema = z.object({
   url: z
@@ -36,11 +39,22 @@ const analyzeSchema = z.object({
       }
     }),
   jobId: jobIdSchema,
+  throttle: throttleSchema,
+  runs: z.coerce.number().min(1).max(5).optional(),
+  cookie: z.string().max(4000).optional(),
+  authorization: z.string().max(2000).optional(),
   minScore: budgetSchema.shape.minScore,
   maxLcpMs: budgetSchema.shape.maxLcpMs,
   maxCls: budgetSchema.shape.maxCls,
   maxTbtMs: budgetSchema.shape.maxTbtMs,
 })
+
+function headersFromInput(input: { cookie?: string; authorization?: string }) {
+  const cookie = input.cookie?.trim()
+  const authorization = input.authorization?.trim()
+  if (!cookie && !authorization) return undefined
+  return { cookie, authorization }
+}
 
 export const analyzeSite = actionClient.inputSchema(analyzeSchema).action(async ({ parsedInput }) => {
   const budget = normalizeBudget({
@@ -49,7 +63,11 @@ export const analyzeSite = actionClient.inputSchema(analyzeSchema).action(async 
     maxCls: parsedInput.maxCls ?? DEFAULT_BUDGET.maxCls,
     maxTbtMs: parsedInput.maxTbtMs ?? DEFAULT_BUDGET.maxTbtMs,
   })
-  const report = await runAnalysis(normalizeUrl(parsedInput.url), budget, parsedInput.jobId)
+  const report = await runAnalysis(normalizeUrl(parsedInput.url), budget, parsedInput.jobId, {
+    throttle: parsedInput.throttle,
+    runs: parsedInput.runs ?? 1,
+    headers: headersFromInput(parsedInput),
+  })
   redirect(`/r/${report.id}`)
 })
 
@@ -57,6 +75,10 @@ const crawlSchema = z.object({
   url: z.string().trim().min(1, "Zadaj URL sitemapy alebo webu."),
   limit: z.coerce.number().min(1).max(8).optional().default(5),
   jobId: jobIdSchema,
+  throttle: throttleSchema,
+  runs: z.coerce.number().min(1).max(5).optional(),
+  cookie: z.string().max(4000).optional(),
+  authorization: z.string().max(2000).optional(),
   minScore: budgetSchema.shape.minScore,
   maxLcpMs: budgetSchema.shape.maxLcpMs,
   maxCls: budgetSchema.shape.maxCls,
@@ -74,6 +96,9 @@ export const analyzeSitemap = actionClient.inputSchema(crawlSchema).action(async
     limit: parsedInput.limit,
     budget,
     jobId: parsedInput.jobId,
+    throttle: parsedInput.throttle,
+    runs: parsedInput.runs ?? 1,
+    headers: headersFromInput(parsedInput),
   })
   redirect(`/c/${crawl.id}`)
 })
@@ -97,4 +122,16 @@ export const loadDemo = actionClient.inputSchema(demoSchema).action(async ({ par
   }
   await saveReport(report)
   redirect(`/r/${report.id}`)
+})
+
+export const getProjectBudget = actionClient.action(async () => {
+  return (await loadProjectBudget()) ?? DEFAULT_BUDGET
+})
+
+export const persistProjectBudget = actionClient.inputSchema(budgetSchema).action(async ({ parsedInput }) => {
+  return saveProjectBudget(parsedInput)
+})
+
+export const getRecentLabs = actionClient.action(async () => {
+  return listRecentLabs(24)
 })

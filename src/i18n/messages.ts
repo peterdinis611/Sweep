@@ -38,6 +38,18 @@ export type Messages = {
     crawlLimit: string
     budgetToggle: string
     budgetHide: string
+    budgetSave: string
+    budgetSaved: string
+    throttle: string
+    throttleMobile: string
+    throttleSlow4g: string
+    throttleCable: string
+    throttleUnthrottled: string
+    runs: string
+    stagingToggle: string
+    stagingHide: string
+    cookie: string
+    authorization: string
   }
   progress: {
     labRunning: string
@@ -113,6 +125,22 @@ export type Messages = {
     impactHigh: string
     impactMedium: string
     impactLow: string
+    criticalTitle: string
+    criticalSub: string
+    criticalEmpty: string
+    runStatsTitle: string
+    lhrDownload: string
+    lhrMobile: string
+    lhrDesktop: string
+  }
+  labs: {
+    title: string
+    ttlHint: string
+    loading: string
+    empty: string
+    report: string
+    crawl: string
+    expires: string
   }
   crawl: {
     kicker: string
@@ -131,6 +159,11 @@ export type Messages = {
     fail: string
     err: string
     notFound: string
+    matrixTitle: string
+    matrixSub: string
+    matrixAudit: string
+    matrixCount: string
+    matrixUrls: string
   }
   skeleton: {
     improve: string
@@ -175,6 +208,18 @@ export const dictionaries: Record<Locale, Messages> = {
       crawlLimit: "Počet URL",
       budgetToggle: "Nastaviť budget",
       budgetHide: "Skryť budget",
+      budgetSave: "Uložiť do .sweepbudget.json",
+      budgetSaved: "Budget uložený",
+      throttle: "Throttling",
+      throttleMobile: "Mobile default",
+      throttleSlow4g: "Slow 4G",
+      throttleCable: "Cable",
+      throttleUnthrottled: "Unthrottled",
+      runs: "Mobile runs (median)",
+      stagingToggle: "Staging headers",
+      stagingHide: "Skryť staging",
+      cookie: "Cookie",
+      authorization: "Authorization",
     },
     progress: {
       labRunning: "Laboratórium beží",
@@ -273,9 +318,25 @@ export const dictionaries: Record<Locale, Messages> = {
       budgetFail: "Budget FAIL",
       annotationDone: "Označiť ako opravené",
       annotationUndo: "Zrušiť označenie",
-impactHigh: "vysoký",
+      impactHigh: "vysoký",
       impactMedium: "stredný",
       impactLow: "nízky",
+      criticalTitle: "LCP / critical path",
+      criticalSub: "LCP element a hlavné requesty z Lighthouse.",
+      criticalEmpty: "Critical path nie je v tomto reporte k dispozícii.",
+      runStatsTitle: "Median runs",
+      lhrDownload: "LHR",
+      lhrMobile: "LHR mobile",
+      lhrDesktop: "LHR desktop",
+    },
+    labs: {
+      title: "Recent labs",
+      ttlHint: "TTL",
+      loading: "Načítavam…",
+      empty: "Zatiaľ žiadne merania v data/.",
+      report: "Report",
+      crawl: "Crawl",
+      expires: "ešte {days} d",
     },
     crawl: {
       kicker: "Sitemap crawl",
@@ -295,6 +356,11 @@ impactHigh: "vysoký",
       fail: "FAIL",
       err: "ERR",
       notFound: "Crawl sa nenašiel",
+      matrixTitle: "Opportunity matrix",
+      matrixSub: "Audity, ktoré bijú najviac URL v crawli.",
+      matrixAudit: "Audit",
+      matrixCount: "URL",
+      matrixUrls: "Príklady",
     },
     skeleton: {
       improve: "06 — čo zlepšiť",
@@ -337,6 +403,18 @@ impactHigh: "vysoký",
       crawlLimit: "Počet URL",
       budgetToggle: "Nastavit budget",
       budgetHide: "Skrýt budget",
+      budgetSave: "Uložit do .sweepbudget.json",
+      budgetSaved: "Budget uložen",
+      throttle: "Throttling",
+      throttleMobile: "Mobile default",
+      throttleSlow4g: "Slow 4G",
+      throttleCable: "Cable",
+      throttleUnthrottled: "Unthrottled",
+      runs: "Mobile runs (median)",
+      stagingToggle: "Staging headers",
+      stagingHide: "Skrýt staging",
+      cookie: "Cookie",
+      authorization: "Authorization",
     },
     progress: {
       labRunning: "Laboratoř běží",
@@ -435,9 +513,25 @@ impactHigh: "vysoký",
       budgetFail: "Budget FAIL",
       annotationDone: "Označit jako opravené",
       annotationUndo: "Zrušit označení",
-impactHigh: "vysoký",
+      impactHigh: "vysoký",
       impactMedium: "střední",
       impactLow: "nízký",
+      criticalTitle: "LCP / critical path",
+      criticalSub: "LCP element a hlavní requesty z Lighthouse.",
+      criticalEmpty: "Critical path v tomto reportu není k dispozici.",
+      runStatsTitle: "Median runs",
+      lhrDownload: "LHR",
+      lhrMobile: "LHR mobile",
+      lhrDesktop: "LHR desktop",
+    },
+    labs: {
+      title: "Recent labs",
+      ttlHint: "TTL",
+      loading: "Načítám…",
+      empty: "Zatím žádná měření v data/.",
+      report: "Report",
+      crawl: "Crawl",
+      expires: "ještě {days} d",
     },
     crawl: {
       kicker: "Sitemap crawl",
@@ -457,6 +551,11 @@ impactHigh: "vysoký",
       fail: "FAIL",
       err: "ERR",
       notFound: "Crawl se nenašel",
+      matrixTitle: "Opportunity matrix",
+      matrixSub: "Audity, které bijí nejvíc URL v crawlu.",
+      matrixAudit: "Audit",
+      matrixCount: "URL",
+      matrixUrls: "Příklady",
     },
     skeleton: {
       improve: "06 — co zlepšit",
@@ -499,6 +598,18 @@ impactHigh: "vysoký",
       crawlLimit: "URL count",
       budgetToggle: "Set budget",
       budgetHide: "Hide budget",
+      budgetSave: "Save to .sweepbudget.json",
+      budgetSaved: "Budget saved",
+      throttle: "Throttling",
+      throttleMobile: "Mobile default",
+      throttleSlow4g: "Slow 4G",
+      throttleCable: "Cable",
+      throttleUnthrottled: "Unthrottled",
+      runs: "Mobile runs (median)",
+      stagingToggle: "Staging headers",
+      stagingHide: "Hide staging",
+      cookie: "Cookie",
+      authorization: "Authorization",
     },
     progress: {
       labRunning: "Lab running",
@@ -597,9 +708,25 @@ impactHigh: "vysoký",
       budgetFail: "Budget FAIL",
       annotationDone: "Mark as fixed",
       annotationUndo: "Undo mark",
-impactHigh: "high",
+      impactHigh: "high",
       impactMedium: "medium",
       impactLow: "low",
+      criticalTitle: "LCP / critical path",
+      criticalSub: "LCP element and main requests from Lighthouse.",
+      criticalEmpty: "Critical path is not available in this report.",
+      runStatsTitle: "Median runs",
+      lhrDownload: "LHR",
+      lhrMobile: "LHR mobile",
+      lhrDesktop: "LHR desktop",
+    },
+    labs: {
+      title: "Recent labs",
+      ttlHint: "TTL",
+      loading: "Loading…",
+      empty: "No labs in data/ yet.",
+      report: "Report",
+      crawl: "Crawl",
+      expires: "{days}d left",
     },
     crawl: {
       kicker: "Sitemap crawl",
@@ -619,6 +746,11 @@ impactHigh: "high",
       fail: "FAIL",
       err: "ERR",
       notFound: "Crawl not found",
+      matrixTitle: "Opportunity matrix",
+      matrixSub: "Audits that hit the most URLs in this crawl.",
+      matrixAudit: "Audit",
+      matrixCount: "URLs",
+      matrixUrls: "Examples",
     },
     skeleton: {
       improve: "06 — what to improve",

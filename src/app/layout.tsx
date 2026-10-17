@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { LocaleProvider } from "@/i18n/provider"
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, siteUrl } from "@/config/site"
+import { SITE_DESCRIPTION, SITE_DESCRIPTION_SK, SITE_NAME, SITE_TAGLINE, siteUrl } from "@/config/site"
 import { fonts } from "@/styles/tokens.stylex"
 import "./globals.css"
 
@@ -15,6 +15,8 @@ const display = Newsreader({
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 })
 
 const body = IBM_Plex_Sans({
@@ -22,6 +24,8 @@ const body = IBM_Plex_Sans({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600"],
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 })
 
 const mono = IBM_Plex_Mono({
@@ -29,6 +33,8 @@ const mono = IBM_Plex_Mono({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500"],
   display: "swap",
+  preload: false,
+  adjustFontFallback: true,
 })
 
 const title = `${SITE_NAME} — ${SITE_TAGLINE}`
@@ -45,6 +51,7 @@ export const metadata: Metadata = {
     "PageSpeed Insights",
     "Core Web Vitals",
     "Lighthouse",
+    "web performance",
     "LCP",
     "INP",
     "CLS",
@@ -54,31 +61,52 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
+  publisher: SITE_NAME,
   category: "technology",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    languages: {
+      "sk-SK": "/",
+      "cs-CZ": "/",
+      "en-GB": "/",
+      "x-default": "/",
+    },
+  },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   openGraph: {
     type: "website",
     locale: "sk_SK",
+    alternateLocale: ["cs_CZ", "en_GB"],
     url: "/",
     siteName: SITE_NAME,
     title,
-    description: SITE_DESCRIPTION,
+    description: SITE_DESCRIPTION_SK,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: title }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
   formatDetection: { telephone: false, email: false, address: false },
   appleWebApp: {
     capable: true,
     title: SITE_NAME,
     statusBarStyle: "default",
+  },
+  other: {
+    "theme-color": "#0a2458",
   },
 }
 
@@ -91,8 +119,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   colorScheme: "light dark",
 }
-
-export const maxDuration = 180
 
 const bootScript = `try{
   var t=localStorage.getItem('sweep-theme');

@@ -1,0 +1,6 @@
+{
+  "minScore": 50,
+  "maxLcpMs": 2500,
+  "maxCls": 0.25,
+  "maxTbtMs": 600
+}

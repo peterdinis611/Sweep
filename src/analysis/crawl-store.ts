@@ -23,6 +23,26 @@ export const loadCrawl = cache(async (id: string): Promise<Crawl | null> => {
   }
 })
 
+export async function listCrawls(limit = 40): Promise<Crawl[]> {
+  const out: Crawl[] = []
+  try {
+    const files = await readdir(DIR)
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue
+      try {
+        const raw = await readFile(path.join(DIR, file), "utf8")
+        out.push(JSON.parse(raw) as Crawl)
+      } catch {
+        /* skip */
+      }
+    }
+  } catch {
+    return []
+  }
+  out.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+  return out.slice(0, limit)
+}
+
 export async function cleanupExpiredCrawls() {
   if (!Number.isFinite(TTL_DAYS) || TTL_DAYS <= 0) return
   const cutoff = Date.now() - TTL_DAYS * 24 * 60 * 60 * 1000

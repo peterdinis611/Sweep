@@ -215,6 +215,36 @@ export function CrawlView({ crawl }: { crawl: Crawl }) {
         </table>
       </div>
 
+      {crawl.opportunityMatrix && crawl.opportunityMatrix.length > 0 && (
+        <div data-testid="opportunity-matrix">
+          <p {...stylex.props(common.kicker)}>{t.crawl.matrixTitle}</p>
+          <p {...stylex.props(styles.meta)}>{t.crawl.matrixSub}</p>
+          <div {...stylex.props(common.plate)} style={{ marginTop: "0.75rem" }}>
+            <table {...stylex.props(styles.table)}>
+              <thead>
+                <tr>
+                  <th {...stylex.props(styles.th)}>{t.crawl.matrixAudit}</th>
+                  <th {...stylex.props(styles.th)}>{t.crawl.matrixCount}</th>
+                  <th {...stylex.props(styles.th)}>{t.crawl.matrixUrls}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {crawl.opportunityMatrix.map((row) => (
+                  <tr key={row.id}>
+                    <td {...stylex.props(styles.td)}>{row.title}</td>
+                    <td {...stylex.props(styles.td)}>{row.count}</td>
+                    <td {...stylex.props(styles.td, styles.url)}>
+                      {row.urls.slice(0, 3).join(" · ")}
+                      {row.urls.length > 3 ? ` (+${row.urls.length - 3})` : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div>
         <Button nativeButton={false} render={<Link href="/" />} style={buttonStyles.roundedNone}>
           {t.crawl.newScan}

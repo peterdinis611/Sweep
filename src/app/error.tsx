@@ -54,7 +54,12 @@ export default function ErrorPage({
           <Button type="button" onClick={() => retry()} style={buttonStyles.roundedNone}>
             Skúsiť znova
           </Button>
-          <Button nativeButton={false} variant="ghost" render={<Link href="/" />} style={buttonStyles.roundedNone}>
+          <Button
+            nativeButton={false}
+            variant="ghost"
+            render={<Link href="/" />}
+            style={buttonStyles.roundedNone}
+          >
             Domov
           </Button>
         </>

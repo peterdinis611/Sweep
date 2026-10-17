@@ -507,7 +507,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
   const initialStrategy = searchParams.get("s") === "desktop" ? "desktop" : "mobile"
   const [strategy, setStrategy] = useState<Strategy>(initialStrategy)
   const [copied, setCopied] = useState(false)
-  const annotations = useOpportunityAnnotations(report.id)
+  const annotations = useOpportunityAnnotations(report.id, report.finalUrl || report.url)
   const data = report[strategy]
   const budget = normalizeBudget(report.budget)
   const budgetCheck = report.budgetResult?.[strategy] ?? evaluateBudget(data, budget)
@@ -620,6 +620,28 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           >
             <FileDown size={14} /> PDF
           </Button>
+          {report.hasRawLhr && (
+            <>
+              <Button
+                nativeButton={false}
+                render={<a href={`/api/lhr/${report.id}/mobile`} download />}
+                variant="ghost"
+                data-testid="export-lhr-mobile"
+                style={buttonStyles.roundedNone}
+              >
+                <Download size={14} /> {t.report.lhrMobile}
+              </Button>
+              <Button
+                nativeButton={false}
+                render={<a href={`/api/lhr/${report.id}/desktop`} download />}
+                variant="ghost"
+                data-testid="export-lhr-desktop"
+                style={buttonStyles.roundedNone}
+              >
+                <Download size={14} /> {t.report.lhrDesktop}
+              </Button>
+            </>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -633,6 +655,18 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
         </div>
       </div>
       <Separator />
+
+      {data.runStats && data.runStats.runs > 1 && (
+        <div data-testid="run-stats" {...stylex.props(styles.fieldEmpty)}>
+          <span {...stylex.props(common.kicker)}>{t.report.runStatsTitle}</span>
+          <p style={{ margin: "0.35rem 0 0", fontFamily: "var(--font-mono)", fontSize: "0.78rem" }}>
+            n={data.runStats.runs} · median score {data.runStats.medianScore} (Δ{" "}
+            {data.runStats.scoreSpread}) · median LCP {formatMs(data.runStats.medianLcpMs)} (Δ{" "}
+            {formatMs(data.runStats.lcpSpreadMs)})
+            {report.throttle ? ` · ${report.throttle}` : ""}
+          </p>
+        </div>
+      )}
 
       <div
         data-testid="budget-banner"
@@ -692,6 +726,31 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           <CatCell label="Best Practices" value={categories.bestPractices} />
           <CatCell label="SEO" value={categories.seo} />
         </div>
+      </section>
+
+      <section data-testid="critical-path-section">
+        <SectionTitle index="03c" title={t.report.criticalTitle} subtitle={t.report.criticalSub} />
+        {data.criticalPath && (data.criticalPath.lcpElement || data.criticalPath.requests.length > 0) ? (
+          <div {...stylex.props(common.plate)} style={{ padding: "1rem" }}>
+            {data.criticalPath.lcpElement && (
+              <p data-testid="lcp-element" style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", margin: "0 0 0.75rem" }}>
+                LCP: {data.criticalPath.lcpElement}
+                {data.criticalPath.lcpUrl ? ` · ${data.criticalPath.lcpUrl}` : ""}
+              </p>
+            )}
+            <ul style={{ margin: 0, paddingLeft: "1.1rem", fontSize: "0.82rem", lineHeight: 1.5 }}>
+              {data.criticalPath.requests.map((r) => (
+                <li key={`${r.url}-${r.start}`} style={{ wordBreak: "break-all" }}>
+                  {r.type} · {formatBytes(r.transferSize)} · {formatMs(r.duration)} — {r.url}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p data-testid="critical-empty" {...stylex.props(styles.fieldEmpty)}>
+            {t.report.criticalEmpty}
+          </p>
+        )}
       </section>
 
       <section data-testid="field-section">

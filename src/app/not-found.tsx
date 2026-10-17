@@ -6,9 +6,13 @@ import { Button, buttonStyles } from "@/components/ui/button"
 import { colors } from "@/styles/tokens.stylex"
 
 export const metadata: Metadata = {
-  title: "Stránka sa nenašla",
-  description: "Táto adresa v Sweep laboratóriu neexistuje.",
+  title: "Page not found",
+  description: "This address does not exist in the Sweep lab.",
   robots: { index: false, follow: false },
+  openGraph: {
+    title: "404 · Sweep",
+    description: "This address does not exist in the Sweep lab.",
+  },
 }
 
 const styles = stylex.create({
@@ -30,11 +34,9 @@ export default function NotFound() {
       }
       body="Meranie mohlo vypršať, odkaz nie je platný, alebo stránka nikdy neexistovala."
       actions={
-        <>
-          <Button nativeButton={false} render={<Link href="/" />} style={buttonStyles.roundedNone}>
-            Nové meranie
-          </Button>
-        </>
+        <Button nativeButton={false} render={<Link href="/" data-testid="fault-home-link" />} style={buttonStyles.roundedNone}>
+          Nové meranie
+        </Button>
       }
     />
   )

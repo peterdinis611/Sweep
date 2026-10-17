@@ -57,6 +57,36 @@ export async function findLatestByUrl(url: string, excludeId?: string): Promise<
   return latest
 }
 
+export function reportTtlDays() {
+  return Number.isFinite(TTL_DAYS) && TTL_DAYS > 0 ? TTL_DAYS : 14
+}
+
+export function expiresInDays(createdAt: string) {
+  const ttl = reportTtlDays()
+  const age = (Date.now() - new Date(createdAt).getTime()) / (24 * 60 * 60 * 1000)
+  return Math.max(0, Math.ceil(ttl - age))
+}
+
+export async function listReports(limit = 40): Promise<Report[]> {
+  const out: Report[] = []
+  try {
+    const files = await readdir(DIR)
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue
+      try {
+        const raw = await readFile(path.join(DIR, file), "utf8")
+        out.push(JSON.parse(raw) as Report)
+      } catch {
+        /* skip */
+      }
+    }
+  } catch {
+    return []
+  }
+  out.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+  return out.slice(0, limit)
+}
+
 export async function cleanupExpired() {
   if (!Number.isFinite(TTL_DAYS) || TTL_DAYS <= 0) return
   const cutoff = Date.now() - TTL_DAYS * 24 * 60 * 60 * 1000

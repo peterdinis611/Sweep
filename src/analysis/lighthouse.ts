@@ -2,6 +2,8 @@ import { existsSync } from "node:fs"
 import lighthouse from "lighthouse"
 import * as chromeLauncher from "chrome-launcher"
 import type { PsiResponse } from "@/analysis/pagespeed"
+import type { LabHeaders, ThrottlePreset } from "@/analysis/types"
+import { desktopThrottlingFor, throttlingFor } from "@/analysis/throttling"
 
 const FLAGS = ["--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check"]
 
@@ -33,38 +35,79 @@ function resolveBrowser() {
 
 const CATEGORIES = ["performance", "accessibility", "best-practices", "seo"] as const
 
-const desktopSettings = {
-  extends: "lighthouse:default",
-  settings: {
-    formFactor: "desktop" as const,
-    screenEmulation: {
-      mobile: false,
-      width: 1350,
-      height: 940,
-      deviceScaleFactor: 1,
-      disabled: false,
+function buildExtraHeaders(headers?: LabHeaders): Record<string, string> | undefined {
+  if (!headers) return undefined
+  const out: Record<string, string> = { ...(headers.extra ?? {}) }
+  if (headers.cookie?.trim()) out.Cookie = headers.cookie.trim()
+  if (headers.authorization?.trim()) out.Authorization = headers.authorization.trim()
+  return Object.keys(out).length ? out : undefined
+}
+
+function desktopConfig(preset: ThrottlePreset, extraHeaders?: Record<string, string>) {
+  return {
+    extends: "lighthouse:default",
+    settings: {
+      formFactor: "desktop" as const,
+      screenEmulation: {
+        mobile: false,
+        width: 1350,
+        height: 940,
+        deviceScaleFactor: 1,
+        disabled: false,
+      },
+      throttling: desktopThrottlingFor(preset),
+      onlyCategories: [...CATEGORIES],
+      ...(extraHeaders ? { extraHeaders } : {}),
     },
-    throttling: {
-      rttMs: 40,
-      throughputKbps: 10 * 1024,
-      cpuSlowdownMultiplier: 1,
-      requestLatencyMs: 0,
-      downloadThroughputKbps: 0,
-      uploadThroughputKbps: 0,
+  }
+}
+
+function mobileConfig(preset: ThrottlePreset, extraHeaders?: Record<string, string>) {
+  return {
+    extends: "lighthouse:default",
+    settings: {
+      formFactor: "mobile" as const,
+      throttling: throttlingFor(preset),
+      onlyCategories: [...CATEGORIES],
+      ...(extraHeaders ? { extraHeaders } : {}),
+      ...(preset === "unthrottled"
+        ? {
+            throttlingMethod: "provided" as const,
+          }
+        : {}),
     },
-    onlyCategories: [...CATEGORIES],
-  },
+  }
 }
 
 function wrap(lhr: unknown): PsiResponse {
   return { lighthouseResult: lhr as PsiResponse["lighthouseResult"] }
 }
 
+export type LocalPairOptions = {
+  signal?: AbortSignal
+  onPhase?: (phase: "mobile" | "desktop") => void
+  throttle?: ThrottlePreset
+  headers?: LabHeaders
+  /** Mobile runs for median (1–5). Desktop always once. */
+  mobileRuns?: number
+}
+
 export async function runLocalPair(
   url: string,
-  signal?: AbortSignal,
-  onPhase?: (phase: "mobile" | "desktop") => void,
-): Promise<{ mobile: PsiResponse; desktop: PsiResponse }> {
+  signalOrOpts?: AbortSignal | LocalPairOptions,
+  onPhaseMaybe?: (phase: "mobile" | "desktop") => void,
+): Promise<{ mobile: PsiResponse; desktop: PsiResponse; mobileRuns: PsiResponse[] }> {
+  const opts: LocalPairOptions =
+    signalOrOpts && typeof signalOrOpts === "object" && !("aborted" in signalOrOpts)
+      ? signalOrOpts
+      : { signal: signalOrOpts as AbortSignal | undefined, onPhase: onPhaseMaybe }
+
+  const signal = opts.signal
+  const onPhase = opts.onPhase
+  const throttle = opts.throttle ?? "mobileDefault"
+  const mobileRunsCount = Math.min(5, Math.max(1, opts.mobileRuns ?? 1))
+  const extraHeaders = buildExtraHeaders(opts.headers)
+
   const chromePath = resolveBrowser()
   if (!chromePath) {
     throw new Error(
@@ -87,31 +130,49 @@ export async function runLocalPair(
       output: "json" as const,
       logLevel: "error" as const,
       onlyCategories: [...CATEGORIES],
+      ...(extraHeaders ? { extraHeaders } : {}),
     }
 
     onPhase?.("mobile")
-    const mobileRes = await lighthouse(url, flags)
-    if (!mobileRes?.lhr) throw new Error("Lighthouse nevrátil mobilný výsledok.")
-    if (mobileRes.lhr.runtimeError?.message) {
-      throw new Error(mapLocalError(mobileRes.lhr.runtimeError.message))
+    const mobileRuns: PsiResponse[] = []
+    for (let i = 0; i < mobileRunsCount; i++) {
+      if (signal?.aborted) throw new Error("Meranie bolo prerušené.")
+      const mobileRes = await lighthouse(url, flags, mobileConfig(throttle, extraHeaders) as never)
+      if (!mobileRes?.lhr) throw new Error("Lighthouse nevrátil mobilný výsledok.")
+      if (mobileRes.lhr.runtimeError?.message) {
+        throw new Error(mapLocalError(mobileRes.lhr.runtimeError.message))
+      }
+      mobileRuns.push(wrap(mobileRes.lhr))
     }
 
     if (signal?.aborted) throw new Error("Meranie bolo prerušené.")
 
     onPhase?.("desktop")
-    const desktopRes = await lighthouse(url, flags, desktopSettings as never)
+    const desktopRes = await lighthouse(url, flags, desktopConfig(throttle, extraHeaders) as never)
     if (!desktopRes?.lhr) throw new Error("Lighthouse nevrátil desktopový výsledok.")
     if (desktopRes.lhr.runtimeError?.message) {
       throw new Error(mapLocalError(desktopRes.lhr.runtimeError.message))
     }
 
-    return { mobile: wrap(mobileRes.lhr), desktop: wrap(desktopRes.lhr) }
+    const mobile = pickMedianRun(mobileRuns)
+    return { mobile, desktop: wrap(desktopRes.lhr), mobileRuns }
   } catch (e) {
     throw new Error(mapLocalError(e instanceof Error ? e.message : String(e)))
   } finally {
     signal?.removeEventListener("abort", onAbort)
     await chrome?.kill()
   }
+}
+
+function pickMedianRun(runs: PsiResponse[]): PsiResponse {
+  if (runs.length === 1) return runs[0]!
+  const scored = runs.map((r, i) => ({
+    i,
+    score: Math.round((r.lighthouseResult?.categories?.performance?.score ?? 0) * 100),
+  }))
+  scored.sort((a, b) => a.score - b.score)
+  const mid = scored[Math.floor(scored.length / 2)]!
+  return runs[mid.i]!
 }
 
 function mapLocalError(message: string) {

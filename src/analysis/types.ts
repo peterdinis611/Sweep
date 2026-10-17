@@ -2,6 +2,7 @@ export type Rating = "good" | "ni" | "poor"
 export type Strategy = "mobile" | "desktop"
 export type Impact = "high" | "medium" | "low"
 export type AnalysisEngine = "lighthouse" | "psi" | "demo"
+export type ThrottlePreset = "mobileDefault" | "slow4g" | "cable" | "unthrottled"
 
 export type Metric = {
   id: string
@@ -79,6 +80,38 @@ export type BudgetCheck = {
   failures: BudgetFailure[]
 }
 
+export type CriticalRequest = {
+  url: string
+  transferSize: number
+  start: number
+  duration: number
+  type: string
+}
+
+export type CriticalPath = {
+  lcpElement?: string
+  lcpUrl?: string
+  lcpType?: string
+  requests: CriticalRequest[]
+}
+
+export type RunSample = {
+  score: number
+  lcpMs: number
+  cls: number
+  tbtMs: number
+}
+
+export type RunStats = {
+  runs: number
+  scores: number[]
+  lcpMs: number[]
+  medianScore: number
+  medianLcpMs: number
+  scoreSpread: number
+  lcpSpreadMs: number
+}
+
 export type StrategyReport = {
   score: number
   categories: CategoryScores
@@ -96,6 +129,14 @@ export type StrategyReport = {
   waterfall: WaterfallItem[]
   screenshot?: string
   filmstrip: FilmstripFrame[]
+  criticalPath?: CriticalPath
+  runStats?: RunStats
+}
+
+export type LabHeaders = {
+  cookie?: string
+  authorization?: string
+  extra?: Record<string, string>
 }
 
 export type Report = {
@@ -111,6 +152,9 @@ export type Report = {
   mobile: StrategyReport
   desktop: StrategyReport
   field: FieldMetric[]
+  throttle?: ThrottlePreset
+  runs?: number
+  hasRawLhr?: boolean
 }
 
 export type CrawlItem = {
@@ -120,6 +164,14 @@ export type CrawlItem = {
   mobileScore?: number
   desktopScore?: number
   budgetPassed?: boolean
+  opportunityIds?: string[]
+}
+
+export type OpportunityMatrixRow = {
+  id: string
+  title: string
+  count: number
+  urls: string[]
 }
 
 export type Crawl = {
@@ -128,6 +180,19 @@ export type Crawl = {
   createdAt: string
   budget: Budget
   items: CrawlItem[]
+  opportunityMatrix?: OpportunityMatrixRow[]
+}
+
+export type LabListItem = {
+  kind: "report" | "crawl"
+  id: string
+  host: string
+  url: string
+  createdAt: string
+  score?: number
+  passed?: boolean
+  expiresInDays: number
+  href: string
 }
 
 export const DEFAULT_BUDGET: Budget = {
@@ -136,3 +201,5 @@ export const DEFAULT_BUDGET: Budget = {
   maxCls: 0.25,
   maxTbtMs: 600,
 }
+
+export const THROTTLE_PRESETS: ThrottlePreset[] = ["mobileDefault", "slow4g", "cable", "unthrottled"]

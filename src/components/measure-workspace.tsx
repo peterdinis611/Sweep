@@ -5,7 +5,8 @@ import { ArrowRight, LoaderCircle } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useAction } from "next-safe-action/hooks"
 import * as stylex from "@stylexjs/stylex"
-import { analyzeSite, analyzeSitemap, loadDemo } from "@/app/actions"
+import { analyzeSite, analyzeSitemap, getProjectBudget, loadDemo, persistProjectBudget } from "@/app/actions"
+import type { ThrottlePreset } from "@/analysis/types"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button, buttonStyles } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -410,11 +411,28 @@ export function MeasureWorkspace({
   const [maxTbtMs, setMaxTbtMs] = useState("600")
   const [crawlLimit, setCrawlLimit] = useState("5")
   const [jobId, setJobId] = useState<string | null>(null)
+  const [throttle, setThrottle] = useState<ThrottlePreset>("mobileDefault")
+  const [runs, setRuns] = useState("1")
+  const [showStaging, setShowStaging] = useState(false)
+  const [cookie, setCookie] = useState("")
+  const [authorization, setAuthorization] = useState("")
+  const [budgetSaved, setBudgetSaved] = useState(false)
 
   useEffect(() => {
     setUrl(initialUrl)
     setError(null)
   }, [pathname, initialUrl])
+
+  useEffect(() => {
+    void getProjectBudget().then((res) => {
+      const b = res?.data
+      if (!b) return
+      setMinScore(String(b.minScore))
+      setMaxLcpMs(String(b.maxLcpMs))
+      setMaxCls(String(b.maxCls))
+      setMaxTbtMs(String(b.maxTbtMs))
+    })
+  }, [])
 
   const analyze = useAction(analyzeSite, {
     onExecute: () => setError(null),
@@ -459,10 +477,24 @@ export function MeasureWorkspace({
     const id = crypto.randomUUID()
     setJobId(id)
     const budget = budgetPayload()
+    const extra = {
+      throttle,
+      runs: Number(runs) || 1,
+      cookie: cookie.trim() || undefined,
+      authorization: authorization.trim() || undefined,
+    }
     if (mode === "sitemap") {
-      crawl.execute({ url, limit: Number(crawlLimit) || 5, jobId: id, ...budget })
+      crawl.execute({ url, limit: Number(crawlLimit) || 5, jobId: id, ...budget, ...extra })
     } else {
-      analyze.execute({ url, jobId: id, ...budget })
+      analyze.execute({ url, jobId: id, ...budget, ...extra })
+    }
+  }
+
+  async function saveBudgetFile() {
+    const res = await persistProjectBudget(budgetPayload())
+    if (res?.data) {
+      setBudgetSaved(true)
+      window.setTimeout(() => setBudgetSaved(false), 1800)
     }
   }
 
@@ -495,6 +527,18 @@ export function MeasureWorkspace({
             setMaxTbtMs={setMaxTbtMs}
             crawlLimit={crawlLimit}
             setCrawlLimit={setCrawlLimit}
+            throttle={throttle}
+            setThrottle={setThrottle}
+            runs={runs}
+            setRuns={setRuns}
+            showStaging={showStaging}
+            setShowStaging={setShowStaging}
+            cookie={cookie}
+            setCookie={setCookie}
+            authorization={authorization}
+            setAuthorization={setAuthorization}
+            budgetSaved={budgetSaved}
+            onSaveBudget={() => void saveBudgetFile()}
             onSubmit={submit}
             onDemo={() => runDemo("mid")}
             onDemoPoor={() => runDemo("poor")}
@@ -522,6 +566,18 @@ export function MeasureWorkspace({
             setMaxTbtMs={setMaxTbtMs}
             crawlLimit={crawlLimit}
             setCrawlLimit={setCrawlLimit}
+            throttle={throttle}
+            setThrottle={setThrottle}
+            runs={runs}
+            setRuns={setRuns}
+            showStaging={showStaging}
+            setShowStaging={setShowStaging}
+            cookie={cookie}
+            setCookie={setCookie}
+            authorization={authorization}
+            setAuthorization={setAuthorization}
+            budgetSaved={budgetSaved}
+            onSaveBudget={() => void saveBudgetFile()}
             onSubmit={submit}
             onDemo={() => runDemo("mid")}
             onDemoPoor={() => runDemo("poor")}
@@ -567,6 +623,18 @@ function SearchForm({
   setMaxTbtMs,
   crawlLimit,
   setCrawlLimit,
+  throttle,
+  setThrottle,
+  runs,
+  setRuns,
+  showStaging,
+  setShowStaging,
+  cookie,
+  setCookie,
+  authorization,
+  setAuthorization,
+  budgetSaved,
+  onSaveBudget,
 }: {
   url: string
   setUrl: (v: string) => void
@@ -590,6 +658,18 @@ function SearchForm({
   setMaxTbtMs: (v: string) => void
   crawlLimit: string
   setCrawlLimit: (v: string) => void
+  throttle: ThrottlePreset
+  setThrottle: (v: ThrottlePreset) => void
+  runs: string
+  setRuns: (v: string) => void
+  showStaging: boolean
+  setShowStaging: (v: boolean) => void
+  cookie: string
+  setCookie: (v: string) => void
+  authorization: string
+  setAuthorization: (v: string) => void
+  budgetSaved: boolean
+  onSaveBudget: () => void
 }) {
   const { t } = useI18n()
   const advancedOpen = showBudget
@@ -749,6 +829,73 @@ function SearchForm({
                   />
                 </label>
               )}
+              <label {...stylex.props(styles.advField)}>
+                <span {...stylex.props(styles.advLabel)}>{t.form.throttle}</span>
+                <select
+                  data-testid="throttle-select"
+                  value={throttle}
+                  disabled={busy}
+                  onChange={(e) => setThrottle(e.target.value as ThrottlePreset)}
+                  {...stylex.props(styles.advInput)}
+                  style={{ width: "100%" }}
+                >
+                  <option value="mobileDefault">{t.form.throttleMobile}</option>
+                  <option value="slow4g">{t.form.throttleSlow4g}</option>
+                  <option value="cable">{t.form.throttleCable}</option>
+                  <option value="unthrottled">{t.form.throttleUnthrottled}</option>
+                </select>
+              </label>
+              <label {...stylex.props(styles.advField)}>
+                <span {...stylex.props(styles.advLabel)}>{t.form.runs}</span>
+                <Input
+                  data-testid="runs-input"
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={runs}
+                  onChange={(e) => setRuns(e.target.value)}
+                  disabled={busy}
+                  {...stylex.props(styles.advInput)}
+                />
+              </label>
+              <div {...stylex.props(styles.advField)} style={{ gridColumn: "1 / -1" }}>
+                <button
+                  type="button"
+                  data-testid="budget-save"
+                  disabled={busy}
+                  onClick={onSaveBudget}
+                  {...stylex.props(styles.budgetToggle)}
+                >
+                  {budgetSaved ? t.form.budgetSaved : t.form.budgetSave}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!compact && showStaging && (
+            <div {...stylex.props(styles.advanced)} data-testid="staging-fields">
+              <label {...stylex.props(styles.advField)} style={{ gridColumn: "1 / -1" }}>
+                <span {...stylex.props(styles.advLabel)}>{t.form.cookie}</span>
+                <Input
+                  data-testid="staging-cookie"
+                  value={cookie}
+                  onChange={(e) => setCookie(e.target.value)}
+                  disabled={busy}
+                  placeholder="session=…"
+                  {...stylex.props(styles.advInput)}
+                />
+              </label>
+              <label {...stylex.props(styles.advField)} style={{ gridColumn: "1 / -1" }}>
+                <span {...stylex.props(styles.advLabel)}>{t.form.authorization}</span>
+                <Input
+                  data-testid="staging-auth"
+                  value={authorization}
+                  onChange={(e) => setAuthorization(e.target.value)}
+                  disabled={busy}
+                  placeholder="Bearer …"
+                  {...stylex.props(styles.advInput)}
+                />
+              </label>
             </div>
           )}
 
@@ -787,6 +934,19 @@ function SearchForm({
                 {...stylex.props(styles.budgetToggle)}
               >
                 {advancedOpen ? t.form.budgetHide : t.form.budgetToggle}
+              </button>
+              <span {...stylex.props(styles.meta)} aria-hidden>
+                ·
+              </span>
+              <button
+                type="button"
+                data-testid="staging-toggle"
+                disabled={busy}
+                aria-expanded={showStaging}
+                onClick={() => setShowStaging(!showStaging)}
+                {...stylex.props(styles.budgetToggle)}
+              >
+                {showStaging ? t.form.stagingHide : t.form.stagingToggle}
               </button>
             </div>
           )}

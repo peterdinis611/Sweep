@@ -40,6 +40,8 @@ yarn-error.log*
 
 /data/reports
 /data/crawls
+/data/lhr
+.sweepbudget.json
 
 # vercel
 .vercel

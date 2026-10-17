@@ -5,13 +5,16 @@ import type {
   Metric,
   Rating,
   Report,
+  RunStats,
   Strategy,
   StrategyReport,
+  ThrottlePreset,
   WaterfallItem,
   Budget,
 } from "@/analysis/types"
 import { DEFAULT_BUDGET } from "@/analysis/types"
 import { evaluateBudget, normalizeBudget } from "@/analysis/budget"
+import { extractCriticalPath, median, spread } from "@/analysis/critical-path"
 import { buildImprovements, buildStrengths, localizeOpportunityTitles } from "@/analysis/insights"
 
 const LABELS: Record<string, string> = {
@@ -57,6 +60,7 @@ type PsiAudit = {
     overallSavingsMs?: number
     items?: Record<string, unknown>[]
     data?: string
+    chains?: Record<string, unknown>
   }
 }
 
@@ -202,6 +206,27 @@ function parseStrategy(json: PsiResponse): StrategyReport {
     waterfall,
     screenshot: audits["final-screenshot"]?.details?.data,
     filmstrip,
+    criticalPath: extractCriticalPath(audits),
+  }
+}
+
+export function buildRunStats(mobileRuns: PsiResponse[]): RunStats | undefined {
+  if (mobileRuns.length < 2) return undefined
+  const scores: number[] = []
+  const lcpMs: number[] = []
+  for (const run of mobileRuns) {
+    const audits = run.lighthouseResult?.audits ?? {}
+    scores.push(Math.round((run.lighthouseResult?.categories?.performance?.score ?? 0) * 100))
+    lcpMs.push(Math.round(audits["largest-contentful-paint"]?.numericValue ?? 0))
+  }
+  return {
+    runs: mobileRuns.length,
+    scores,
+    lcpMs,
+    medianScore: Math.round(median(scores)),
+    medianLcpMs: Math.round(median(lcpMs)),
+    scoreSpread: spread(scores),
+    lcpSpreadMs: Math.round(spread(lcpMs)),
   }
 }
 
@@ -387,12 +412,17 @@ export function buildReport(
     previousId?: string
     budget?: Partial<Budget>
     field?: FieldMetric[]
+    throttle?: ThrottlePreset
+    runs?: number
+    hasRawLhr?: boolean
+    mobileRunStats?: RunStats
   } = {
     engine: "lighthouse",
   },
 ): Report {
   const mobile = parseStrategy(mobileJson)
   const desktop = parseStrategy(desktopJson)
+  if (meta.mobileRunStats) mobile.runStats = meta.mobileRunStats
   const field =
     meta.field ??
     (parseField(mobileJson).length ? parseField(mobileJson) : parseField(desktopJson))
@@ -413,6 +443,9 @@ export function buildReport(
     mobile,
     desktop,
     field,
+    throttle: meta.throttle,
+    runs: meta.runs,
+    hasRawLhr: meta.hasRawLhr,
   }
 }
 

@@ -13,17 +13,22 @@ PageSpeed Insights API is only a fallback when Chrome is unavailable and `PAGESP
 
 Reports live in `data/reports/` and are shareable at `/r/[id]`. Re-measuring the same URL shows an A/B diff. Old reports (and crawls) expire after `REPORT_TTL_DAYS` (default 14).
 
+Public SEO: `/sitemap.xml`, `/robots.txt`, OG image, JSON-LD. Private routes (`/r/*`, `/c/*`, `/api/*`) are noindex. Invalid report/crawl ids return a branded **400**; missing labs return **404**; render failures use **500**.
+
 Demos on the homepage: **Demo** (mid score) and **Slow site**.
 
 Features:
-- **Budget** — min score, max LCP / CLS / TBT (PASS/FAIL on the report)
-- **Sitemap crawl** — Sitemap mode on the homepage → `/c/[id]` (share + CSV)
-- **Lighthouse categories** — Performance, Accessibility, Best Practices, SEO
-- **Annotations** — mark opportunities as fixed (localStorage)
-- **OG image** — `/r/[id]/opengraph-image` from the score
-- **PDF** — real download (structured scores + opportunities)
-- **Deep link** — `/r/[id]?s=desktop`
-- **Live progress** — real lab phases; crawls show `URL 3/5`
+- **Budget** — min score, max LCP / CLS / TBT; optional `.sweepbudget.json` (see `.sweepbudget.json.example`)
+- **Throttling** — mobile default / Slow 4G / cable / unthrottled
+- **N-run median** — 1–5 mobile runs with variance on the report
+- **Staging headers** — Cookie / Authorization for local auth pages
+- **Raw LHR** — download full Lighthouse JSON from the report toolbar
+- **Recent labs** — homepage list of reports/crawls with TTL
+- **Sitemap crawl** — `/c/[id]` with share, CSV, and opportunity matrix
+- **LCP / critical path** — LCP element + main requests
+- **Annotations** — fixed marks keyed by host (survive re-measure)
+- **CLI gate** — `pnpm sweep -- https://example.com` (exit 0/1/2)
+- **PDF / CSV / OG / deep link** — `/r/[id]?s=desktop`
 
 ## E2E (Playwright)
 

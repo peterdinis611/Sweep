@@ -116,8 +116,9 @@ export default function GlobalError({
       style={htmlSx.style}
     >
       <head>
-        <title>Porucha · Sweep</title>
+        <title>500 · Sweep</title>
         <meta name="robots" content="noindex, nofollow" />
+        <meta name="description" content="Critical application error in Sweep." />
         <script
           dangerouslySetInnerHTML={{
             __html: `try{if(localStorage.getItem('sweep-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
