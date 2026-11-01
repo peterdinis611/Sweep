@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/analysis/__tests__/*.test.ts",
     "sweep": "tsx scripts/sweep-check.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

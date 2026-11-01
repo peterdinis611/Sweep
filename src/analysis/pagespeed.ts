@@ -335,14 +335,14 @@ function stripHtml(s: string) {
 export function humanPsiError(message: string) {
   const m = message.toLowerCase()
   if (m.includes("failed_document_request") || m.includes("dns") || m.includes("net::")) {
-    return "Stránka je nedostupná alebo odmietla meranie. Skontroluj URL a či je verejná."
+    return "Page is unreachable or blocked the lab. Check the URL and that it is public."
   }
   if (m.includes("invalidargument") || (m.includes("invalid") && m.includes("url"))) {
-    return "Neplatná URL adresa."
+    return "Invalid URL."
   }
-  if (m.includes("timeout") || m.includes("timed out")) return "Meranie vypršalo. Skús to znova o chvíľu."
+  if (m.includes("timeout") || m.includes("timed out")) return "Measurement timed out. Try again shortly."
   if (m.includes("quota") || m.includes("rate") || m.includes("resource_exhausted") || m.includes("exceeded")) {
-    return "Kvóta PageSpeed API je vyčerpaná. Do .env.local pridaj PAGESPEED_API_KEY (bezplatný kľúč v Google Cloud Console → PageSpeed Insights API)."
+    return "PageSpeed API quota exceeded. Add PAGESPEED_API_KEY to .env.local."
   }
   if (
     m.includes("something went wrong") ||
@@ -350,23 +350,23 @@ export function humanPsiError(message: string) {
     m.includes("internal error") ||
     m.includes("backend error")
   ) {
-    return "Vzdialené laboratórium (PageSpeed) teraz zlyhalo. Skús to znova — Sweep skúsi lokálne Lighthouse, ak je dostupný Chrome."
+    return "Remote PageSpeed lab failed. Retry — Sweep will use local Lighthouse when Chrome is available."
   }
   return message.slice(0, 220)
 }
 
 export function normalizeUrl(input: string) {
   const raw = input.trim()
-  if (!raw) throw new Error("Zadaj URL adresu.")
+  if (!raw) throw new Error("Enter a URL.")
   const withProto = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
   let url: URL
   try {
     url = new URL(withProto)
   } catch {
-    throw new Error("Neplatná URL adresa.")
+    throw new Error("Invalid URL.")
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error("Povolené sú len adresy http a https.")
+    throw new Error("Only http and https URLs are allowed.")
   }
   return url.toString()
 }
@@ -410,6 +410,7 @@ export function buildReport(
   meta: {
     engine: Report["engine"]
     previousId?: string
+    ownerToken?: string
     budget?: Partial<Budget>
     field?: FieldMetric[]
     throttle?: ThrottlePreset
@@ -435,6 +436,7 @@ export function buildReport(
     createdAt: new Date().toISOString(),
     engine: meta.engine,
     previousId: meta.previousId,
+    ownerToken: meta.ownerToken,
     budget,
     budgetResult: {
       mobile: evaluateBudget(mobile, budget),

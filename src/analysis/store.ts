@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { cache } from "react"
+import { deleteRawLhr } from "@/analysis/lhr-store"
 import type { Report } from "@/analysis/types"
 
 const DIR = path.join(process.cwd(), "data", "reports")
@@ -57,6 +58,32 @@ export async function findLatestByUrl(url: string, excludeId?: string): Promise<
   return latest
 }
 
+/** Same-host history for compare picker (newest first). */
+export async function listReportsByUrl(url: string, excludeId?: string, limit = 12): Promise<Report[]> {
+  const key = hostKey(url)
+  const out: Report[] = []
+  try {
+    const files = await readdir(DIR)
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue
+      const id = file.slice(0, -5)
+      if (excludeId && id === excludeId) continue
+      try {
+        const raw = await readFile(path.join(DIR, file), "utf8")
+        const report = JSON.parse(raw) as Report
+        if (hostKey(report.finalUrl || report.url) !== key) continue
+        out.push(report)
+      } catch {
+        /* skip */
+      }
+    }
+  } catch {
+    return []
+  }
+  out.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+  return out.slice(0, limit)
+}
+
 export function reportTtlDays() {
   return Number.isFinite(TTL_DAYS) && TTL_DAYS > 0 ? TTL_DAYS : 14
 }
@@ -87,6 +114,17 @@ export async function listReports(limit = 40): Promise<Report[]> {
   return out.slice(0, limit)
 }
 
+export async function deleteReport(id: string): Promise<boolean> {
+  if (!ID_RE.test(id)) return false
+  try {
+    await unlink(path.join(DIR, `${id}.json`))
+    await deleteRawLhr(id)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export async function cleanupExpired() {
   if (!Number.isFinite(TTL_DAYS) || TTL_DAYS <= 0) return
   const cutoff = Date.now() - TTL_DAYS * 24 * 60 * 60 * 1000
@@ -96,10 +134,14 @@ export async function cleanupExpired() {
       files.map(async (file) => {
         if (!file.endsWith(".json")) return
         const full = path.join(DIR, file)
+        const id = file.slice(0, -5)
         try {
           const raw = await readFile(full, "utf8")
           const report = JSON.parse(raw) as Report
-          if (new Date(report.createdAt).getTime() < cutoff) await unlink(full)
+          if (new Date(report.createdAt).getTime() < cutoff) {
+            await unlink(full)
+            await deleteRawLhr(id)
+          }
         } catch {
           /* ignore */
         }

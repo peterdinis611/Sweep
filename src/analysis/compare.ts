@@ -27,7 +27,7 @@ export function buildStrategyDelta(current: StrategyReport, previous: StrategyRe
   return [
     {
       key: "score",
-      label: "Skóre",
+      label: "Score",
       current: String(current.score),
       previous: String(previous.score),
       delta: current.score - previous.score,
@@ -40,7 +40,7 @@ export function buildStrategyDelta(current: StrategyReport, previous: StrategyRe
     metricDelta("TTFB", "ttfb", current.ttfb, previous.ttfb),
     {
       key: "bytes",
-      label: "Prenos",
+      label: "Transfer",
       current: String(current.bytes),
       previous: String(previous.bytes),
       delta: previous.bytes - current.bytes,

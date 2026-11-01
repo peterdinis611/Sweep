@@ -15,7 +15,7 @@ export function evaluateBudget(data: StrategyReport, budget: Budget): BudgetChec
   if (data.score < budget.minScore) {
     failures.push({
       id: "score",
-      label: "Performance skóre",
+      label: "Score",
       actual: String(data.score),
       limit: `≥ ${budget.minScore}`,
     })

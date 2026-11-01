@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Check, Download, FileDown, Share2 } from "lucide-react"
+import { Check, Download, FileDown, Share2, Trash2 } from "lucide-react"
+import { deleteLabReport } from "@/app/actions"
 import * as stylex from "@stylexjs/stylex"
 import { evaluateBudget, normalizeBudget } from "@/analysis/budget"
 import type { Report, Strategy, StrategyReport } from "@/analysis/types"
@@ -664,14 +665,50 @@ function ratingStyle(rating: "good" | "ni" | "poor") {
   return common.ratingPoor
 }
 
-export function ReportView({ report, previous }: { report: Report; previous?: Report | null }) {
+const BASELINE_KEY = "sweep-baseline"
+
+export function ReportView({
+  report,
+  previous,
+  compareId = null,
+  history = [],
+  canDelete = false,
+}: {
+  report: Report
+  previous?: Report | null
+  compareId?: string | null
+  history?: Report[]
+  canDelete?: boolean
+}) {
   const { t, locale } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialStrategy = searchParams.get("s") === "desktop" ? "desktop" : "mobile"
   const [strategy, setStrategy] = useState<Strategy>(initialStrategy)
   const [copied, setCopied] = useState(false)
+  const [pinned, setPinned] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const annotations = useOpportunityAnnotations(report.id, report.finalUrl || report.url)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(BASELINE_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw) as { host?: string; id?: string }
+      const host = new URL(report.finalUrl || report.url).hostname
+      if (parsed.host === host && parsed.id) {
+        setPinned(parsed.id)
+        if (!searchParams.get("vs") && parsed.id !== report.id) {
+          const next = new URLSearchParams(searchParams.toString())
+          next.set("vs", parsed.id)
+          router.replace(`/r/${report.id}?${next.toString()}`)
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- apply pinned baseline once on mount
+  }, [report.id])
   const data = report[strategy]
   const budget = normalizeBudget(report.budget)
   const budgetCheck = report.budgetResult?.[strategy] ?? evaluateBudget(data, budget)
@@ -729,6 +766,37 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
     report.engine === "psi" ? t.report.enginePsi : report.engine === "demo" ? t.report.engineDemo : t.report.engineLh
   const prevStrategy = previous?.[strategy]
 
+  function setCompare(vs: string | null) {
+    const next = new URLSearchParams(searchParams.toString())
+    if (vs) next.set("vs", vs)
+    else next.delete("vs")
+    const q = next.toString()
+    router.push(q ? `/r/${report.id}?${q}` : `/r/${report.id}`)
+  }
+
+  function togglePin() {
+    const host = new URL(report.finalUrl || report.url).hostname
+    if (pinned === report.id) {
+      localStorage.removeItem(BASELINE_KEY)
+      setPinned(null)
+      return
+    }
+    localStorage.setItem(BASELINE_KEY, JSON.stringify({ host, id: report.id }))
+    setPinned(report.id)
+  }
+
+  async function onDelete() {
+    if (!canDelete || deleting) return
+    if (!window.confirm(t.report.deleteConfirm)) return
+    setDeleting(true)
+    const res = await deleteLabReport({ reportId: report.id })
+    if (res?.data?.ok) {
+      window.location.assign("/")
+      return
+    }
+    setDeleting(false)
+  }
+
   return (
     <div data-testid="report-view" {...stylex.props(styles.root)}>
       <div {...stylex.props(styles.masthead)}>
@@ -753,7 +821,73 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
             <a href="/" data-testid="report-new-scan" {...stylex.props(styles.metaLink)}>
               {t.report.newScan}
             </a>
+            {canDelete ? (
+              <>
+                <span {...stylex.props(styles.metaSep)}>·</span>
+                <button
+                  type="button"
+                  data-testid="delete-report"
+                  disabled={deleting}
+                  onClick={() => void onDelete()}
+                  {...stylex.props(styles.metaLink)}
+                  style={{ appearance: "none", background: "none", border: 0, padding: 0, cursor: "pointer" }}
+                >
+                  <Trash2 size={12} style={{ display: "inline", verticalAlign: "-1px", marginRight: 4 }} />
+                  {deleting ? t.report.deleted : t.report.delete}
+                </button>
+              </>
+            ) : null}
           </p>
+          {(history.length > 0 || pinned) && (
+            <div
+              data-testid="compare-picker"
+              style={{
+                marginTop: "0.85rem",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "0.5rem",
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.65rem",
+              }}
+            >
+              <span style={{ color: "var(--muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {t.report.compareVs}
+              </span>
+              <select
+                data-testid="compare-select"
+                value={compareId ?? ""}
+                onChange={(e) => setCompare(e.target.value || null)}
+                style={{
+                  height: "2rem",
+                  border: "1px solid var(--line)",
+                  background: "var(--card)",
+                  color: "var(--fg)",
+                  borderRadius: 0,
+                  paddingInline: "0.5rem",
+                  maxWidth: "16rem",
+                }}
+              >
+                <option value="">{t.report.comparePick}</option>
+                {pinned && pinned !== report.id ? (
+                  <option value={pinned}>pin · {pinned.slice(0, 8)}</option>
+                ) : null}
+                {history.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {new Date(h.createdAt).toLocaleString(DATE_LOCALE[locale])} · {h.mobile.score}
+                  </option>
+                ))}
+              </select>
+              {compareId ? (
+                <button type="button" data-testid="compare-clear" onClick={() => setCompare(null)} {...stylex.props(styles.metaLink)} style={{ appearance: "none", background: "none", border: 0, cursor: "pointer" }}>
+                  {t.report.compareClear}
+                </button>
+              ) : null}
+              <button type="button" data-testid="pin-baseline" onClick={togglePin} {...stylex.props(styles.metaLink)} style={{ appearance: "none", background: "none", border: 0, cursor: "pointer" }}>
+                {pinned === report.id ? t.report.unpinBaseline : t.report.pinBaseline}
+              </button>
+            </div>
+          )}
         </div>
         <div data-testid="report-toolbar" {...stylex.props(styles.toolbar, common.noPrint)}>
           <Tabs value={strategy} onValueChange={(value) => changeStrategy(value as Strategy)}>
@@ -859,7 +993,7 @@ export function ReportView({ report, previous }: { report: Report; previous?: Re
           <ul {...stylex.props(styles.budgetList)}>
             {budgetCheck.failures.map((f) => (
               <li key={f.id}>
-                {f.label}: {f.actual} ({f.limit})
+                {f.id === "score" ? t.report.score : f.label}: {f.actual} ({f.limit})
               </li>
             ))}
           </ul>
@@ -1215,19 +1349,7 @@ function AbCompare({
 
 function Compare({ mobile, desktop }: { mobile: StrategyReport; desktop: StrategyReport }) {
   const { t } = useI18n()
-  const rows = useMemo(
-    () => [
-      [t.report.score, String(mobile.score), String(desktop.score)],
-      ["LCP", mobile.lcp.display, desktop.lcp.display],
-      ["TBT", mobile.tbt.display, desktop.tbt.display],
-      ["CLS", mobile.cls.display, desktop.cls.display],
-      ["FCP", mobile.fcp.display, desktop.fcp.display],
-      ["TTFB", mobile.ttfb.display, desktop.ttfb.display],
-      [t.report.size, formatBytes(mobile.bytes), formatBytes(desktop.bytes)],
-      [t.report.requests, String(mobile.requests), String(desktop.requests)],
-    ],
-    [mobile, desktop, t],
-  )
+  const rows = useMemo(() => buildStrategyDelta(desktop, mobile), [mobile, desktop])
   return (
     <section>
       <SectionTitle index="12" title={t.report.compareTitle} subtitle={t.report.compareSub} />
@@ -1238,18 +1360,40 @@ function Compare({ mobile, desktop }: { mobile: StrategyReport; desktop: Strateg
               <TableHead>{t.report.metric}</TableHead>
               <TableHead>{t.report.mobile}</TableHead>
               <TableHead>{t.report.desktop}</TableHead>
+              <TableHead>{t.report.abDelta}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((r) => (
-              <TableRow key={r[0]}>
-                {r.map((c, i) => (
-                  <TableCell key={`${r[0]}-${i}`} style={i === 0 ? styles.cellMuted : styles.cellStrong}>
-                    {c}
+            {rows.map((row) => {
+              const tone = deltaTone(row)
+              const toneLabel =
+                tone === "good" ? t.report.deltaBetter : tone === "bad" ? t.report.deltaWorse : t.report.deltaFlat
+              const mobDisplay = row.key === "bytes" ? formatBytes(Number(row.previous)) : row.previous
+              const deskDisplay = row.key === "bytes" ? formatBytes(Number(row.current)) : row.current
+              return (
+                <TableRow key={row.key}>
+                  <TableCell style={styles.cellMuted}>{row.key === "score" ? t.report.score : row.key === "bytes" ? t.report.transfer : row.label}</TableCell>
+                  <TableCell style={styles.cellStrong}>{mobDisplay}</TableCell>
+                  <TableCell style={styles.cellStrong}>{deskDisplay}</TableCell>
+                  <TableCell
+                    style={
+                      tone === "good"
+                        ? [styles.cellStrong, styles.deltaGood]
+                        : tone === "bad"
+                          ? [styles.cellStrong, styles.deltaBad]
+                          : [styles.cellStrong, styles.deltaFlat]
+                    }
+                    aria-label={toneLabel}
+                    title={toneLabel}
+                  >
+                    {formatDelta(row)}
+                    <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+                      {toneLabel}
+                    </span>
                   </TableCell>
-                ))}
-              </TableRow>
-            ))}
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </div>

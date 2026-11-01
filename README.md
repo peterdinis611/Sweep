@@ -29,12 +29,18 @@ Features:
 - **Annotations** — fixed marks keyed by host (survive re-measure)
 - **CLI gate** — `pnpm sweep -- https://example.com` (exit 0/1/2)
 - **PDF / CSV / OG / deep link** — `/r/[id]?s=desktop`
+- **Compare any two** — `/r/[id]?vs=[otherId]` + pin baseline (localStorage)
+- **Cancel lab** — abort in-progress job; queue capped by `SWEEP_MAX_QUEUE` (default 8)
+- **Delete own report** — owner cookie set on create; delete from report masthead
+- **LHR TTL** — raw Lighthouse JSON cleaned with expired reports
 
-## E2E (Playwright)
+## Tests & CI
 
 ```bash
-pnpm test:e2e        # Chromium (+ mobile) against next dev
-pnpm test:e2e:ui     # interactive UI mode
+pnpm typecheck
+pnpm test            # unit tests in src/analysis/__tests__
+pnpm test:e2e        # Playwright
+pnpm test:e2e:ui
 ```
 
-In CI: `pnpm build`, then `CI=1 pnpm test:e2e` (uses `next start`).
+CI runs typecheck + unit tests, then build + Playwright.

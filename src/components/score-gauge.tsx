@@ -150,7 +150,20 @@ export function ScoreGauge({ score, label }: { score: number; label: string }) {
   )
 }
 
+const RATING_LABEL: Record<Rating, string> = {
+  good: "Good",
+  ni: "Needs improvement",
+  poor: "Poor",
+}
+
 export function RatingDot({ rating }: { rating: Rating }) {
   const tone = rating === "good" ? styles.good : rating === "ni" ? styles.ni : styles.poor
-  return <i {...stylex.props(styles.dot, tone)} />
+  return (
+    <i
+      {...stylex.props(styles.dot, tone)}
+      role="img"
+      aria-label={RATING_LABEL[rating]}
+      title={RATING_LABEL[rating]}
+    />
+  )
 }

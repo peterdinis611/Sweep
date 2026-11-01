@@ -61,6 +61,7 @@ export type Messages = {
     etaMid: string
     etaLate: string
     etaLong: string
+    cancel: string
     labels: {
       verify: string
       mobile: string
@@ -132,6 +133,18 @@ export type Messages = {
     lhrDownload: string
     lhrMobile: string
     lhrDesktop: string
+    delete: string
+    deleted: string
+    deleteConfirm: string
+    compareVs: string
+    comparePick: string
+    compareClear: string
+    pinBaseline: string
+    unpinBaseline: string
+    baselinePinned: string
+    deltaBetter: string
+    deltaWorse: string
+    deltaFlat: string
   }
   labs: {
     title: string
@@ -231,6 +244,7 @@ export const dictionaries: Record<Locale, Messages> = {
       etaMid: "Druhý prechod laboratória…",
       etaLate: "Už skoro hotovo",
       etaLong: "Ešte chvíľu — laboratórium beží",
+      cancel: "Zrušiť",
       labels: {
         verify: "Overujem URL",
         mobile: "Lighthouse · mobil",
@@ -328,6 +342,18 @@ export const dictionaries: Record<Locale, Messages> = {
       lhrDownload: "LHR",
       lhrMobile: "LHR mobile",
       lhrDesktop: "LHR desktop",
+      delete: "Zmazať report",
+      deleted: "Zmazané",
+      deleteConfirm: "Naozaj zmazať tento report?",
+      compareVs: "Porovnať s",
+      comparePick: "Vybrať baseline",
+      compareClear: "Zrušiť porovnanie",
+      pinBaseline: "Pin baseline",
+      unpinBaseline: "Odopnúť baseline",
+      baselinePinned: "Baseline uložená",
+      deltaBetter: "lepšie",
+      deltaWorse: "horšie",
+      deltaFlat: "bez zmeny",
     },
     labs: {
       title: "Recent labs",
@@ -426,6 +452,7 @@ export const dictionaries: Record<Locale, Messages> = {
       etaMid: "Druhý průchod laboratoře…",
       etaLate: "Už skoro hotovo",
       etaLong: "Ještě chvíli — laboratoř běží",
+      cancel: "Zrušit",
       labels: {
         verify: "Ověřuji URL",
         mobile: "Lighthouse · mobil",
@@ -523,6 +550,18 @@ export const dictionaries: Record<Locale, Messages> = {
       lhrDownload: "LHR",
       lhrMobile: "LHR mobile",
       lhrDesktop: "LHR desktop",
+      delete: "Smazat report",
+      deleted: "Smazáno",
+      deleteConfirm: "Opravdu smazat tento report?",
+      compareVs: "Porovnat s",
+      comparePick: "Vybrat baseline",
+      compareClear: "Zrušit porovnání",
+      pinBaseline: "Pin baseline",
+      unpinBaseline: "Odepnout baseline",
+      baselinePinned: "Baseline uložena",
+      deltaBetter: "lepší",
+      deltaWorse: "horší",
+      deltaFlat: "bez změny",
     },
     labs: {
       title: "Recent labs",
@@ -621,6 +660,7 @@ export const dictionaries: Record<Locale, Messages> = {
       etaMid: "Second lab pass…",
       etaLate: "Almost done",
       etaLong: "Still running — hang tight",
+      cancel: "Cancel",
       labels: {
         verify: "Checking URL",
         mobile: "Lighthouse · mobile",
@@ -718,6 +758,18 @@ export const dictionaries: Record<Locale, Messages> = {
       lhrDownload: "LHR",
       lhrMobile: "LHR mobile",
       lhrDesktop: "LHR desktop",
+      delete: "Delete report",
+      deleted: "Deleted",
+      deleteConfirm: "Delete this report?",
+      compareVs: "Compare with",
+      comparePick: "Pick baseline",
+      compareClear: "Clear compare",
+      pinBaseline: "Pin baseline",
+      unpinBaseline: "Unpin baseline",
+      baselinePinned: "Baseline pinned",
+      deltaBetter: "better",
+      deltaWorse: "worse",
+      deltaFlat: "unchanged",
     },
     labs: {
       title: "Recent labs",

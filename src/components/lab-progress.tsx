@@ -342,6 +342,8 @@ export function LabProgress({
   elapsedSec = 0,
   current,
   total,
+  jobId,
+  onCancel,
 }: {
   pct: number
   labelKey?: ProgressLabelKey | ""
@@ -349,6 +351,8 @@ export function LabProgress({
   elapsedSec?: number
   current?: number
   total?: number
+  jobId?: string | null
+  onCancel?: () => void
 }) {
   const { t } = useI18n()
   const active = activeStepIndex(pct)
@@ -435,6 +439,28 @@ export function LabProgress({
                 <p {...stylex.props(common.kicker)}>{t.progress.elapsed}</p>
                 <p {...stylex.props(styles.elapsedValue)}>{formatElapsed(elapsedSec)}</p>
                 <p {...stylex.props(styles.eta)}>{etaHint}</p>
+                {jobId && onCancel ? (
+                  <button
+                    type="button"
+                    data-testid="cancel-lab"
+                    onClick={onCancel}
+                    style={{
+                      marginTop: "0.65rem",
+                      appearance: "none",
+                      border: "1px solid var(--line)",
+                      background: "transparent",
+                      color: "var(--muted)",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.62rem",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      padding: "0.35rem 0.65rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {t.progress.cancel}
+                  </button>
+                ) : null}
               </div>
             </div>
 

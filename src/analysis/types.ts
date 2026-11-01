@@ -66,7 +66,7 @@ export type Budget = {
   maxTbtMs: number
 }
 
-export type ProgressPhase = "verify" | "mobile" | "desktop" | "report" | "field" | "crawl"
+export type ProgressPhase = "verify" | "mobile" | "desktop" | "report" | "field" | "crawl" | "cancelled"
 
 export type BudgetFailure = {
   id: string
@@ -147,6 +147,8 @@ export type Report = {
   engine: AnalysisEngine
   /** Predchádzajúci report pre tú istú URL (A/B diff). */
   previousId?: string
+  /** Secret for delete / ownership — never expose in client JSON responses if stripped. */
+  ownerToken?: string
   budget: Budget
   budgetResult: { mobile: BudgetCheck; desktop: BudgetCheck }
   mobile: StrategyReport

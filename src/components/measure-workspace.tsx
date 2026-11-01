@@ -5,7 +5,14 @@ import { ArrowRight, LoaderCircle } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useAction } from "next-safe-action/hooks"
 import * as stylex from "@stylexjs/stylex"
-import { analyzeSite, analyzeSitemap, getProjectBudget, loadDemo, persistProjectBudget } from "@/app/actions"
+import {
+  analyzeSite,
+  analyzeSitemap,
+  cancelLabJob,
+  getProjectBudget,
+  loadDemo,
+  persistProjectBudget,
+} from "@/app/actions"
 import type { ThrottlePreset } from "@/analysis/types"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button, buttonStyles } from "@/components/ui/button"
@@ -720,6 +727,14 @@ export function MeasureWorkspace({
           elapsedSec={progress.elapsedSec}
           current={progress.current}
           total={progress.total}
+          jobId={jobId}
+          onCancel={
+            jobId
+              ? () => {
+                  void cancelLabJob({ jobId })
+                }
+              : undefined
+          }
         />
       )}
       {!busy && children}
@@ -886,7 +901,7 @@ function SearchForm({
             </div>
           </div>
 
-          {!compact && advancedOpen && (
+          {advancedOpen && (
             <div {...stylex.props(styles.advanced)} data-testid="budget-fields">
               <div {...stylex.props(styles.advRow)}>
                 <label {...stylex.props(styles.advField)}>
@@ -1003,7 +1018,7 @@ function SearchForm({
             </div>
           )}
 
-          {!compact && showStaging && (
+          {showStaging && (
             <div {...stylex.props(styles.advanced)} data-testid="staging-fields">
               <label {...stylex.props(styles.advField)}>
                 <span {...stylex.props(styles.advLabel)}>{t.form.cookie}</span>
@@ -1030,57 +1045,59 @@ function SearchForm({
             </div>
           )}
 
-          {!compact && (
-            <div {...stylex.props(styles.foot)}>
-              <button
-                type="button"
-                data-testid="demo-button"
-                disabled={busy}
-                onClick={onDemo}
-                {...stylex.props(styles.linkBtn, styles.meta)}
-              >
-                {t.form.demo}
-              </button>
-              <span {...stylex.props(styles.footSep)} aria-hidden>
-                ·
-              </span>
-              <button
-                type="button"
-                data-testid="demo-poor-button"
-                disabled={busy}
-                onClick={onDemoPoor}
-                {...stylex.props(styles.linkBtn, styles.meta)}
-              >
-                {t.form.demoPoor}
-              </button>
-              <span {...stylex.props(styles.footSep)} aria-hidden>
-                ·
-              </span>
-              <button
-                type="button"
-                data-testid="budget-toggle"
-                disabled={busy}
-                aria-expanded={advancedOpen}
-                onClick={() => setShowBudget(!showBudget)}
-                {...stylex.props(styles.budgetToggle)}
-              >
-                {advancedOpen ? t.form.budgetHide : t.form.budgetToggle}
-              </button>
-              <span {...stylex.props(styles.footSep)} aria-hidden>
-                ·
-              </span>
-              <button
-                type="button"
-                data-testid="staging-toggle"
-                disabled={busy}
-                aria-expanded={showStaging}
-                onClick={() => setShowStaging(!showStaging)}
-                {...stylex.props(styles.budgetToggle)}
-              >
-                {showStaging ? t.form.stagingHide : t.form.stagingToggle}
-              </button>
-            </div>
-          )}
+          <div {...stylex.props(styles.foot)}>
+            {!compact && (
+              <>
+                <button
+                  type="button"
+                  data-testid="demo-button"
+                  disabled={busy}
+                  onClick={onDemo}
+                  {...stylex.props(styles.linkBtn, styles.meta)}
+                >
+                  {t.form.demo}
+                </button>
+                <span {...stylex.props(styles.footSep)} aria-hidden>
+                  ·
+                </span>
+                <button
+                  type="button"
+                  data-testid="demo-poor-button"
+                  disabled={busy}
+                  onClick={onDemoPoor}
+                  {...stylex.props(styles.linkBtn, styles.meta)}
+                >
+                  {t.form.demoPoor}
+                </button>
+                <span {...stylex.props(styles.footSep)} aria-hidden>
+                  ·
+                </span>
+              </>
+            )}
+            <button
+              type="button"
+              data-testid="budget-toggle"
+              disabled={busy}
+              aria-expanded={advancedOpen}
+              onClick={() => setShowBudget(!showBudget)}
+              {...stylex.props(styles.budgetToggle)}
+            >
+              {advancedOpen ? t.form.budgetHide : t.form.budgetToggle}
+            </button>
+            <span {...stylex.props(styles.footSep)} aria-hidden>
+              ·
+            </span>
+            <button
+              type="button"
+              data-testid="staging-toggle"
+              disabled={busy}
+              aria-expanded={showStaging}
+              onClick={() => setShowStaging(!showStaging)}
+              {...stylex.props(styles.budgetToggle)}
+            >
+              {showStaging ? t.form.stagingHide : t.form.stagingToggle}
+            </button>
+          </div>
         </div>
       </form>
 
