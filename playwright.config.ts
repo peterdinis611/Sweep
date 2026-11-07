@@ -34,6 +34,7 @@ export default defineConfig({
       ...process.env,
       // Production `next start` hides demos unless explicitly enabled (e2e needs them).
       SWEEP_ALLOW_DEMO: process.env.SWEEP_ALLOW_DEMO ?? "1",
+      SWEEP_RATE_LIMIT: process.env.SWEEP_RATE_LIMIT ?? "100",
     },
   },
   projects: [

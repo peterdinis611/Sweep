@@ -58,12 +58,18 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          # Homepage demos are runtime-gated; keep CI env consistent for next start.
+          SWEEP_ALLOW_DEMO: "1"
 
       - name: Run Playwright
         run: pnpm test:e2e
         env:
           CI: "1"
           SWEEP_ALLOW_DEMO: "1"
+          # Many demo opens across projects; avoid process-local rate-limit stalls.
+          SWEEP_RATE_LIMIT: "100"
+          SWEEP_RATE_WINDOW_MS: "60000"
 
       - uses: actions/upload-artifact@v4
         if: failure()

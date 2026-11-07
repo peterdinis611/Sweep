@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { connection } from "next/server"
 import { MeasureWorkspace } from "@/components/measure-workspace"
 import { SiteJsonLd } from "@/components/site-json-ld"
 import { HomeHero } from "@/components/home-hero"
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
 /** Analysis actions set their own duration; keep the homepage light. */
 export const maxDuration = 60
 
-export default function HomePage() {
+/** Runtime env (SWEEP_ALLOW_DEMO) must apply — do not bake demos into static HTML at build. */
+export default async function HomePage() {
+  await connection()
   return (
     <>
       <SiteJsonLd />

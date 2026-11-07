@@ -32,11 +32,10 @@ export class HomePage {
   }
 
   async openDemo(variant: "mid" | "poor" = "mid") {
-    if (variant === "poor") {
-      await this.demoPoorButton.click()
-    } else {
-      await this.demoButton.click()
-    }
+    const target = variant === "poor" ? this.demoPoorButton : this.demoButton
+    // Fail fast if demos were baked out of the homepage (static prod build without SWEEP_ALLOW_DEMO).
+    await expect(target).toBeVisible({ timeout: 10_000 })
+    await target.click()
     await this.page.waitForURL(/\/r\/[a-z0-9-]+/i, { timeout: 45_000 })
     await expect(this.page.getByTestId("report-view")).toBeVisible({ timeout: 15_000 })
   }
