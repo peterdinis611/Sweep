@@ -15,6 +15,7 @@ import { resolveBudget } from "@/analysis/budget-file"
 import { clearJobProgress, setJobProgress } from "@/analysis/progress"
 import { saveRawLhr } from "@/analysis/lhr-store"
 import { enqueueJob, JobCancelledError, runCancellable } from "@/analysis/queue"
+import { assertPublicUrl } from "@/analysis/ssrf"
 import type {
   AnalysisEngine,
   Budget,
@@ -183,6 +184,7 @@ export async function runAnalysis(
   jobId?: string,
   opts?: AnalysisOptions,
 ): Promise<Report> {
+  await assertPublicUrl(url)
   if (opts?.skipQueue) {
     return runCancellable(jobId, (signal) => executeAnalysis(url, budgetInput, jobId, opts, signal), opts.signal)
   }
@@ -200,6 +202,7 @@ export async function runSitemapCrawl(
     runs?: number
   },
 ): Promise<Crawl> {
+  await assertPublicUrl(sitemapUrl)
   const { budget } = await resolveBudget(opts?.budget)
   const limit = Math.min(8, Math.max(1, opts?.limit ?? 5))
   const jobId = opts?.jobId

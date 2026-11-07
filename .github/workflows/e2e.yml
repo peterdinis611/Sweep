@@ -23,6 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
 
       - name: Typecheck
         run: pnpm typecheck
@@ -48,6 +50,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
@@ -59,6 +63,7 @@ jobs:
         run: pnpm test:e2e
         env:
           CI: "1"
+          SWEEP_ALLOW_DEMO: "1"
 
       - uses: actions/upload-artifact@v4
         if: failure()

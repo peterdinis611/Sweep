@@ -43,8 +43,9 @@
   },
   "packageManager": "pnpm@11.1.2",
   "pnpm": {
-    "ignoredBuiltDependencies": [
-      "puppeteer"
-    ]
+    "allowBuilds": {
+      "esbuild": true,
+      "puppeteer": false
+    }
   }
 }

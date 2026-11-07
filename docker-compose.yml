@@ -1,0 +1,24 @@
+services:
+  sweep:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      PAGESPEED_API_KEY: ${PAGESPEED_API_KEY:-}
+      REPORT_TTL_DAYS: ${REPORT_TTL_DAYS:-14}
+      SWEEP_MAX_QUEUE: ${SWEEP_MAX_QUEUE:-8}
+      SWEEP_RATE_LIMIT: ${SWEEP_RATE_LIMIT:-8}
+      SWEEP_RATE_WINDOW_MS: ${SWEEP_RATE_WINDOW_MS:-60000}
+      SWEEP_ALLOW_PRIVATE_URLS: ${SWEEP_ALLOW_PRIVATE_URLS:-0}
+      SWEEP_ALLOW_DEMO: ${SWEEP_ALLOW_DEMO:-0}
+      CHROME_PATH: /usr/bin/chromium
+    volumes:
+      - sweep-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  sweep-data:

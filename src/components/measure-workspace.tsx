@@ -528,10 +528,13 @@ export function MeasureWorkspace({
   hero,
   children,
   initialUrl = "",
+  showDemos = true,
 }: {
   hero?: React.ReactNode
   children?: React.ReactNode
   initialUrl?: string
+  /** Homepage demo shortcuts (off in production unless SWEEP_ALLOW_DEMO=1). */
+  showDemos?: boolean
 }) {
   const pathname = usePathname()
   const { t } = useI18n()
@@ -676,12 +679,14 @@ export function MeasureWorkspace({
             onSubmit={submit}
             onDemo={() => runDemo("mid")}
             onDemoPoor={() => runDemo("poor")}
+            showDemos={showDemos}
           />
         </section>
       ) : (
         <section {...stylex.props(styles.compactSection, common.noPrint)}>
           <SearchForm
             compact
+            showDemos={false}
             url={url}
             setUrl={setUrl}
             busy={busy}
@@ -777,6 +782,7 @@ function SearchForm({
   setAuthorization,
   budgetSaved,
   onSaveBudget,
+  showDemos = true,
 }: {
   url: string
   setUrl: (v: string) => void
@@ -786,6 +792,7 @@ function SearchForm({
   onDemo: () => void
   onDemoPoor: () => void
   compact?: boolean
+  showDemos?: boolean
   mode: "url" | "sitemap"
   setMode: (m: "url" | "sitemap") => void
   showBudget: boolean
@@ -1046,7 +1053,7 @@ function SearchForm({
           )}
 
           <div {...stylex.props(styles.foot)}>
-            {!compact && (
+            {!compact && showDemos && (
               <>
                 <button
                   type="button"

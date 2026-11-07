@@ -5,7 +5,10 @@ import { z } from "zod"
 import { DEMO_REPORT, DEMO_REPORT_POOR } from "@/analysis/fixture"
 import { normalizeUrl } from "@/analysis/pagespeed"
 import { runAnalysis, runSitemapCrawl } from "@/analysis/run"
+import { demosEnabled } from "@/config/flags"
 import { actionClient } from "@/server/safe-action"
+import { clientKey, rateLimit } from "@/server/rate-limit"
+import { requestIp } from "@/server/request-ip"
 import { deleteReport, loadReport, saveReport } from "@/analysis/store"
 import { DEFAULT_BUDGET } from "@/analysis/types"
 import { normalizeBudget } from "@/analysis/budget"
@@ -14,6 +17,11 @@ import { loadProjectBudget, saveProjectBudget } from "@/analysis/budget-file"
 import { listRecentLabs } from "@/analysis/labs"
 import { cancelJob, JobCancelledError, QueueFullError } from "@/analysis/queue"
 import { clearOwnerCookie, setOwnerCookie, verifyOwner } from "@/analysis/ownership"
+
+async function guardLabWrite(bucket: string) {
+  const ip = await requestIp()
+  rateLimit(clientKey(ip, bucket))
+}
 
 const budgetSchema = z.object({
   minScore: z.coerce.number().min(0).max(100).optional(),
@@ -59,6 +67,7 @@ function headersFromInput(input: { cookie?: string; authorization?: string }) {
 }
 
 export const analyzeSite = actionClient.inputSchema(analyzeSchema).action(async ({ parsedInput }) => {
+  await guardLabWrite("analyze")
   const budget = normalizeBudget({
     minScore: parsedInput.minScore ?? DEFAULT_BUDGET.minScore,
     maxLcpMs: parsedInput.maxLcpMs ?? DEFAULT_BUDGET.maxLcpMs,
@@ -95,6 +104,7 @@ const crawlSchema = z.object({
 })
 
 export const analyzeSitemap = actionClient.inputSchema(crawlSchema).action(async ({ parsedInput }) => {
+  await guardLabWrite("crawl")
   const budget = normalizeBudget({
     minScore: parsedInput.minScore ?? DEFAULT_BUDGET.minScore,
     maxLcpMs: parsedInput.maxLcpMs ?? DEFAULT_BUDGET.maxLcpMs,
@@ -103,7 +113,7 @@ export const analyzeSitemap = actionClient.inputSchema(crawlSchema).action(async
   })
   let crawl
   try {
-    crawl = await runSitemapCrawl(parsedInput.url, {
+    crawl = await runSitemapCrawl(normalizeUrl(parsedInput.url), {
       limit: parsedInput.limit,
       budget,
       jobId: parsedInput.jobId,
@@ -123,6 +133,8 @@ const demoSchema = z.object({
 })
 
 export const loadDemo = actionClient.inputSchema(demoSchema).action(async ({ parsedInput }) => {
+  if (!demosEnabled()) throw new Error("Demos are disabled on this deployment.")
+  await guardLabWrite("demo")
   const base = parsedInput.variant === "poor" ? DEMO_REPORT_POOR : DEMO_REPORT
   const budget = normalizeBudget(base.budget ?? DEFAULT_BUDGET)
   const { randomUUID } = await import("node:crypto")

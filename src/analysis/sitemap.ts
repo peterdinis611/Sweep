@@ -1,10 +1,12 @@
 import { normalizeUrl } from "@/analysis/pagespeed"
+import { assertPublicUrl } from "@/analysis/ssrf"
 
 const MAX_URLS = 8
 
 /** Stiahne sitemap.xml a vráti až N HTML URL (bez assetov). */
 export async function fetchSitemapUrls(raw: string, limit = 5, signal?: AbortSignal): Promise<string[]> {
   const sitemapUrl = normalizeSitemapUrl(raw)
+  await assertPublicUrl(sitemapUrl)
   const res = await fetch(sitemapUrl, {
     signal,
     headers: { Accept: "application/xml,text/xml,*/*" },
@@ -36,6 +38,7 @@ export async function fetchSitemapUrls(raw: string, limit = 5, signal?: AbortSig
           try {
             const n = normalizeUrl(nestedLoc)
             if (isAsset(n) || looksLikeSitemap(n) || seen.has(n)) continue
+            await assertPublicUrl(n)
             seen.add(n)
             pages.push(n)
           } catch {
@@ -48,6 +51,11 @@ export async function fetchSitemapUrls(raw: string, limit = 5, signal?: AbortSig
       continue
     }
     if (seen.has(href)) continue
+    try {
+      await assertPublicUrl(href)
+    } catch {
+      continue
+    }
     seen.add(href)
     pages.push(href)
   }

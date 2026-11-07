@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import type { Metadata, Viewport } from "next"
 import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
 import * as stylex from "@stylexjs/stylex"
@@ -174,7 +175,7 @@ const styles = stylex.create({
   },
 })
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   const htmlSx = stylex.props(styles.html)
   return (
     <html

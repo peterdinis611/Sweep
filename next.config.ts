@@ -47,6 +47,10 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" }],
       },
       {
+        source: "/api/health",
+        headers: [{ key: "Cache-Control", value: "no-store" }],
+      },
+      {
         source: "/api/progress/:path*",
         headers: [{ key: "Cache-Control", value: "no-store" }],
       },

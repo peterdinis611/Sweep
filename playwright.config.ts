@@ -30,6 +30,11 @@ export default defineConfig({
     timeout: 180_000,
     stdout: "pipe",
     stderr: "pipe",
+    env: {
+      ...process.env,
+      // Production `next start` hides demos unless explicitly enabled (e2e needs them).
+      SWEEP_ALLOW_DEMO: process.env.SWEEP_ALLOW_DEMO ?? "1",
+    },
   },
   projects: [
     {
