@@ -121,7 +121,7 @@ export default function GlobalError({
         <meta name="description" content="Critical application error in Sweep." />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('sweep-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
+            __html: `try{var d=localStorage.getItem('sweep-theme')==='dark';document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light'}catch(e){}`,
           }}
         />
       </head>

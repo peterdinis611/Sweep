@@ -12,6 +12,8 @@ const styles = stylex.create({
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: "transparent",
+    backgroundColor: "transparent",
+    colorScheme: "inherit",
     fontSize: "0.68rem",
     fontWeight: 600,
     letterSpacing: "0.16em",

@@ -123,7 +123,9 @@ export const viewport: Viewport = {
 
 const bootScript = `try{
   var t=localStorage.getItem('sweep-theme');
-  if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
+  var dark=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.classList.toggle('dark', dark);
+  document.documentElement.style.colorScheme=dark?'dark':'light';
   var l=localStorage.getItem('sweep-locale');
   if(l==='sk'||l==='cs'||l==='en')document.documentElement.lang=l;
 }catch(e){}`

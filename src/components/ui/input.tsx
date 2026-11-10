@@ -21,7 +21,8 @@ const styles = stylex.create({
     transitionProperty: "border-color, box-shadow",
     transitionDuration: "150ms",
     "::placeholder": {
-      color: "color-mix(in oklab, var(--muted) 70%, transparent)",
+      color: "var(--placeholder)",
+      opacity: 1,
     },
     ":focus-visible": {
       borderColor: colors.accent,

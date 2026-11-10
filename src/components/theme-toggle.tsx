@@ -37,6 +37,7 @@ const styles = stylex.create({
 
 function applyTheme(dark: boolean) {
   document.documentElement.classList.toggle("dark", dark)
+  document.documentElement.style.colorScheme = dark ? "dark" : "light"
   localStorage.setItem(THEME_KEY, dark ? "dark" : "light")
 }
 
