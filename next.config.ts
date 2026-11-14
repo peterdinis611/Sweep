@@ -12,13 +12,33 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["lighthouse", "chrome-launcher"],
+  // Lighthouse / chrome-launcher must stay external (native + dynamic Chrome launch).
+  serverExternalPackages: ["lighthouse", "chrome-launcher", "puppeteer"],
   // Playwright and some environments hit 127.0.0.1 instead of localhost.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   poweredByHeader: false,
   compress: true,
+  reactStrictMode: true,
+  // Keep-alive helps PSI / sitemap fetches on the Node server.
+  httpAgentOptions: {
+    keepAlive: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24,
+  },
+  experimental: {
+    // Tree-shake large barrels; lucide-react is already optimized by default.
+    optimizePackageImports: ["@base-ui/react", "@stylexjs/stylex", "@tanstack/pacer"],
+    serverActions: {
+      // Analyze payloads are small (URL + budget); keep the body cap tight.
+      bodySizeLimit: "1mb",
+    },
+  },
+  logging: {
+    incomingRequests: {
+      ignore: [/^\/api\/health$/, /^\/api\/progress\//],
+    },
   },
   async headers() {
     return [

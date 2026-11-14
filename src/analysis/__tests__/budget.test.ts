@@ -66,4 +66,20 @@ describe("evaluateBudget", () => {
       ["score", "lcp"],
     )
   })
+
+  it("fails on CLS and TBT", () => {
+    const check = evaluateBudget(
+      stubStrategy({
+        score: 90,
+        cls: { id: "cls", label: "CLS", display: "0.4", numeric: 0.4, rating: "poor", unit: "score" },
+        tbt: { id: "tbt", label: "TBT", display: "900 ms", numeric: 900, rating: "poor", unit: "ms" },
+      }),
+      normalizeBudget({ maxCls: 0.1, maxTbtMs: 300 }),
+    )
+    assert.equal(check.passed, false)
+    assert.deepEqual(
+      check.failures.map((f) => f.id).sort(),
+      ["cls", "tbt"],
+    )
+  })
 })

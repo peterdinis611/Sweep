@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/analysis/__tests__/*.test.ts",
+    "test": "tsx --test src/analysis/__tests__/*.test.ts src/server/__tests__/*.test.ts src/config/__tests__/*.test.ts",
     "sweep": "tsx scripts/sweep-check.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -18,6 +18,7 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@stylexjs/stylex": "^0.19.1",
+    "@tanstack/pacer": "^0.23.1",
     "chrome-launcher": "^1.2.3",
     "lighthouse": "^13.6.0",
     "lucide-react": "^1.70.0",

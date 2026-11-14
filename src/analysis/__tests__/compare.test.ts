@@ -46,4 +46,22 @@ describe("buildStrategyDelta", () => {
     assert.ok(lcp.delta > 0)
     assert.equal(deltaTone(lcp), "good")
   })
+
+  it("marks regressions and formats byte deltas", () => {
+    const rows = buildStrategyDelta(stub(50, 4000, 300_000), stub(80, 2000, 100_000))
+    const score = rows.find((r) => r.key === "score")!
+    assert.equal(deltaTone(score), "bad")
+    assert.equal(formatDelta(score), "-30")
+
+    const bytes = rows.find((r) => r.key === "bytes")!
+    assert.equal(deltaTone(bytes), "bad")
+    assert.match(formatDelta(bytes), /\+200 kB/)
+  })
+
+  it("formats flat score as ±0", () => {
+    const rows = buildStrategyDelta(stub(70, 2000, 100_000), stub(70, 2000, 100_000))
+    const score = rows.find((r) => r.key === "score")!
+    assert.equal(formatDelta(score), "±0")
+    assert.equal(deltaTone(score), "flat")
+  })
 })

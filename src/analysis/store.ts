@@ -5,7 +5,6 @@ import { deleteRawLhr } from "@/analysis/lhr-store"
 import type { Report } from "@/analysis/types"
 
 const DIR = path.join(process.cwd(), "data", "reports")
-const TTL_DAYS = Number(process.env.REPORT_TTL_DAYS ?? 14)
 const ID_RE = /^[a-z0-9-]{8,64}$/i
 
 function hostKey(url: string) {
@@ -85,7 +84,8 @@ export async function listReportsByUrl(url: string, excludeId?: string, limit = 
 }
 
 export function reportTtlDays() {
-  return Number.isFinite(TTL_DAYS) && TTL_DAYS > 0 ? TTL_DAYS : 14
+  const ttl = Number(process.env.REPORT_TTL_DAYS ?? 14)
+  return Number.isFinite(ttl) && ttl > 0 ? ttl : 14
 }
 
 export function expiresInDays(createdAt: string) {
@@ -126,8 +126,9 @@ export async function deleteReport(id: string): Promise<boolean> {
 }
 
 export async function cleanupExpired() {
-  if (!Number.isFinite(TTL_DAYS) || TTL_DAYS <= 0) return
-  const cutoff = Date.now() - TTL_DAYS * 24 * 60 * 60 * 1000
+  const ttl = Number(process.env.REPORT_TTL_DAYS ?? 14)
+  if (!Number.isFinite(ttl) || ttl <= 0) return
+  const cutoff = Date.now() - ttl * 24 * 60 * 60 * 1000
   try {
     const files = await readdir(DIR)
     await Promise.all(

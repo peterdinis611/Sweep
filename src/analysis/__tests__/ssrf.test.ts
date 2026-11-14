@@ -16,11 +16,20 @@ describe("isBlockedIp", () => {
     assert.equal(isBlockedIp("192.168.1.1"), true)
     assert.equal(isBlockedIp("172.16.0.1"), true)
     assert.equal(isBlockedIp("169.254.169.254"), true)
+    assert.equal(isBlockedIp("100.64.1.1"), true)
   })
 
   it("allows public IPv4", () => {
     assert.equal(isBlockedIp("8.8.8.8"), false)
     assert.equal(isBlockedIp("1.1.1.1"), false)
+    assert.equal(isBlockedIp("172.32.0.1"), false)
+  })
+
+  it("blocks loopback / ULA / link-local IPv6", () => {
+    assert.equal(isBlockedIp("::1"), true)
+    assert.equal(isBlockedIp("fc00::1"), true)
+    assert.equal(isBlockedIp("fd12::1"), true)
+    assert.equal(isBlockedIp("fe80::1"), true)
   })
 })
 
